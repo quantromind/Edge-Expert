@@ -26,8 +26,14 @@ const Projects = () => {
   }, []);
 
   const fetchProjects = async () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/api/newprojects");
+      const response = await fetch(`${apiUrl}/newprojects`);
       const data = await response.json();
       if (data.success && data.data && data.data.length > 0) {
         const transformedProjects = data.data.map(project => ({
@@ -55,7 +61,7 @@ const Projects = () => {
         setProjects([...projectsData, ...transformedProjects]);
       }
     } catch (error) {
-      console.log("Using local projects data");
+      // Gracefully use local data
     } finally {
       setLoading(false);
     }

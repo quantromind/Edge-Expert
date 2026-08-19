@@ -313,13 +313,21 @@ export default function HomeProperties() {
 
   // Fetch properties from live APIs with graceful fallback
   useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    // If no backend API URL is configured, use default curated properties cleanly without network errors
+    if (!apiUrl) {
+      setProperties(defaultCuratedProperties);
+      return;
+    }
+
     const fetchAllProperties = async () => {
       try {
         setLoading(true);
         const [commercialRes, sellRes, rentRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/commercialproperties").catch(() => ({ data: { data: [] } })),
-          axios.get("http://localhost:5000/api/sellproperty/").catch(() => ({ data: { data: [] } })),
-          axios.get("http://localhost:5000/api/rentproperties").catch(() => ({ data: { data: [] } })),
+          axios.get(`${apiUrl}/commercialproperties`).catch(() => ({ data: { data: [] } })),
+          axios.get(`${apiUrl}/sellproperty/`).catch(() => ({ data: { data: [] } })),
+          axios.get(`${apiUrl}/rentproperties`).catch(() => ({ data: { data: [] } })),
         ]);
 
         const fetchedList = [];

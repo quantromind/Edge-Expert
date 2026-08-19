@@ -12,10 +12,15 @@ const BuyResidential = () => {
 
   // Fetch properties from API
   useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      setLoading(false);
+      return;
+    }
+
     const fetchProperties = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/sellproperty`,);
-          //  const response = await fetch(`http://localhost:5000/api/sellproperty`,);
+        const response = await fetch(`${apiUrl}/sellproperty`);
         const data = await response.json();
         if (data.success && data.data) {
           // Transform API data to match UI structure
@@ -40,7 +45,7 @@ const BuyResidential = () => {
           setApiProperties(transformedProperties);
         }
       } catch (error) {
-        console.error("Error fetching properties:", error);
+        // Silently fallback if backend is offline
       } finally {
         setLoading(false);
       }
