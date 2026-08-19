@@ -12,12 +12,12 @@ import {
   FaArrowRight
 } from "react-icons/fa";
 
-const ProjectCard = ({ project, onViewDetails }) => { // ✅ Add onViewDetails prop
+const ProjectCard = ({ project, onViewDetails, onEnquiry, onGetPhone }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // ✅ Handle view details button click
+  // Handle view details button click
   const handleViewDetailsClick = (e) => {
-    e.stopPropagation(); // Prevent event bubbling
+    e.stopPropagation();
     if (onViewDetails) {
       onViewDetails();
     }
@@ -25,13 +25,14 @@ const ProjectCard = ({ project, onViewDetails }) => { // ✅ Add onViewDetails p
 
   return (
     <motion.div
-      className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between"
       whileHover={{ y: -5 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      onClick={handleViewDetailsClick}
     >
       {/* Image Container */}
       <div className="relative overflow-hidden">
@@ -44,135 +45,135 @@ const ProjectCard = ({ project, onViewDetails }) => { // ✅ Add onViewDetails p
         />
         
         {/* Status Badge */}
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-white text-sm font-semibold ${
-          project.status.includes("New") ? "bg-green-500" :
-          project.status.includes("Upcoming") ? "bg-purple-500" :
-          "bg-blue-500"
+        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-white text-xs font-bold shadow-xs ${
+          project.status?.includes("New") ? "bg-emerald-600" :
+          project.status?.includes("Upcoming") ? "bg-purple-600" :
+          "bg-blue-600"
         }`}>
           {project.status}
         </div>
 
         {/* Rating Badge */}
         {project.rating && (
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
-            <FaStar className="text-yellow-500 text-sm" />
-            <span className="text-sm font-bold text-gray-800">{project.rating}</span>
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs">
+            <FaStar className="text-amber-500 text-xs" />
+            <span className="text-xs font-bold text-gray-800">{project.rating}</span>
           </div>
         )}
 
         {/* Category Icon */}
-        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm p-2 rounded-full">
+        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-xs p-2 rounded-full shadow-xs">
           {project.category === "Residential" ? (
-            <FaHome className="text-blue-600 text-lg" />
+            <FaHome className="text-blue-600 text-base" />
           ) : (
-            <FaBuilding className="text-green-600 text-lg" />
+            <FaBuilding className="text-emerald-600 text-base" />
           )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="text-xl font-bold text-gray-800">{project.title}</h3>
-          <FaMapMarkerAlt className="text-gray-400 mt-1 flex-shrink-0" />
+      <div className="p-5 flex flex-col flex-1 justify-between">
+        <div>
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-1 hover:text-blue-600 transition">
+              {project.title}
+            </h3>
+          </div>
+
+          <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">{project.description}</p>
+
+          {/* Location */}
+          <div className="flex items-center gap-1.5 mb-3 text-gray-500 text-xs font-medium">
+            <FaMapMarkerAlt className="text-rose-500 flex-shrink-0" />
+            <span className="truncate">{project.location || project.city}</span>
+          </div>
+
+          {/* Specifications */}
+          {project.specs && (
+            <div className="grid grid-cols-2 gap-2 mb-3 bg-gray-50 p-2.5 rounded-xl text-xs text-gray-600">
+              {project.specs.bedrooms && (
+                <div className="flex items-center gap-1.5 truncate">
+                  <FaBed className="text-blue-500 flex-shrink-0" />
+                  <span>{project.specs.bedrooms} Beds</span>
+                </div>
+              )}
+              {project.specs.bathrooms && (
+                <div className="flex items-center gap-1.5 truncate">
+                  <FaBath className="text-emerald-500 flex-shrink-0" />
+                  <span>{project.specs.bathrooms} Baths</span>
+                </div>
+              )}
+              {project.specs.area && (
+                <div className="flex items-center gap-1.5 truncate">
+                  <FaRulerCombined className="text-amber-500 flex-shrink-0" />
+                  <span>{project.specs.area}</span>
+                </div>
+              )}
+              {project.specs.parking && (
+                <div className="flex items-center gap-1.5 truncate">
+                  <FaParking className="text-purple-500 flex-shrink-0" />
+                  <span>{project.specs.parking}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Amenities */}
+          {project.amenities && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {project.amenities.slice(0, 3).map((amenity, index) => (
+                <span key={index} className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md text-[11px] font-medium">
+                  {amenity}
+                </span>
+              ))}
+              {project.amenities.length > 3 && (
+                <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">
+                  +{project.amenities.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        <p className="text-gray-600 text-sm mb-4">{project.description}</p>
-
-        {/* Location */}
-        <div className="flex items-center gap-2 mb-4 text-gray-500">
-          <FaMapMarkerAlt className="text-red-500" />
-          <span className="text-sm">{project.city}</span>
-        </div>
-
-        {/* Specifications */}
-        {project.specs && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            {project.specs.bedrooms && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FaBed className="text-blue-500" />
-                <span>{project.specs.bedrooms} Beds</span>
-              </div>
-            )}
-            {project.specs.bathrooms && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FaBath className="text-green-500" />
-                <span>{project.specs.bathrooms} Baths</span>
-              </div>
-            )}
-            {project.specs.area && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FaRulerCombined className="text-orange-500" />
-                <span>{project.specs.area}</span>
-              </div>
-            )}
-            {project.specs.parking && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FaParking className="text-purple-500" />
-                <span>{project.specs.parking} Parking</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Amenities */}
-        {project.amenities && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {project.amenities.slice(0, 3).map((amenity, index) => (
-              <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">
-                {amenity}
-              </span>
-            ))}
-            {project.amenities.length > 3 && (
-              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                +{project.amenities.length - 3} more
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Price & CTA */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div>
-            <p className="text-sm text-gray-500">Starting from</p>
-            <p className="text-xl font-bold text-gray-800">{project.budget}</p>
+        {/* Price & Action Buttons */}
+        <div className="pt-3 border-t border-gray-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[11px] text-gray-500">Starting from</p>
+              <p className="text-base font-bold text-gray-900">{project.budget || project.price}</p>
+            </div>
+            <button
+              onClick={handleViewDetailsClick}
+              className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+            >
+              Details <FaArrowRight className="text-[10px]" />
+            </button>
           </div>
           
-          {/* ✅ View Details / Visit Project Button */}
-          {project.link ? (
-            <motion.a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2 rounded-full flex items-center gap-2 hover:shadow-lg transition-all text-sm font-semibold cursor-pointer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={(e) => e.stopPropagation()}
+          {/* Action Buttons: Enquiry & Get Phone No */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onEnquiry) onEnquiry(project);
+              }}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all text-xs font-bold shadow-xs hover:shadow-md cursor-pointer"
             >
-              Visit Project
-              <motion.span
-                animate={{ x: isHovered ? 4 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <FaArrowRight />
-              </motion.span>
-            </motion.a>
-          ) : (
-            <motion.button
-              className="bg-blue-600 text-white px-6 py-2 rounded-full flex items-center gap-2 hover:bg-blue-700 transition-colors cursor-pointer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleViewDetailsClick}
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+              </svg>
+              Enquiry
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onGetPhone) onGetPhone(project);
+              }}
+              className="border-2 border-[#1E88E5] text-[#1E88E5] hover:bg-blue-50 py-1.5 px-3 rounded-full flex items-center justify-center gap-1 transition-all text-xs font-bold cursor-pointer"
             >
-              View Details
-              <motion.span
-                animate={{ x: isHovered ? 5 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <FaArrowRight />
-              </motion.span>
-            </motion.button>
-          )}
+              Get Phone No.
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -411,7 +411,6 @@ export default function VideoLoader({ onComplete }) {
                   x5-playsinline="true"
                   x5-video-player-type="h5"
                   muted
-                  defaultMuted
                   preload="auto"
                   onEnded={handleFinish}
                   onTimeUpdate={handleTimeUpdate}

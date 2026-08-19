@@ -19,16 +19,16 @@ import ShareMenu from "./ShareMenu";
 // --- SEARCHABLE PAGES AND TERMS ---
 const PAGES_AND_SEARCH_TERMS = [
   { term: "Home", route: "/" },
-  { term: "Godrej Properties Mumbai", route: "https://www.godrejs-citypanvel.net/", isExternal: true },
-  { term: "JP Infra", route: "https://www.jpinfra.com/", isExternal: true },
-  { term: "Sonam Group", route: "https://sonamgroup.com/", isExternal: true },
-  { term: "Mahindra Lifespaces", route: "https://www.mahindralifespaces.com/", isExternal: true },
+  { term: "Mahindra Lifespaces Mumbai", route: "/properties" },
+  { term: "Ace Group Mumbai", route: "/properties" },
+  { term: "The Sarayu Ayodhya", route: "/properties" },
+  { term: "Lodha & Oberoi Woods", route: "/properties" },
   { term: "Properties for Sale", route: "/properties" },
-  { term: "Property Details", route: "/propertydetails" },
+  { term: "Property Details", route: "/properties" },
   { term: "Buy Residential", route: "/buyresidential" },
   { term: "Services", route: "/services" },
   { term: "About Us", route: "/aboutus" },
-  { term: "Contact Us", route: "/contactus" },
+  { term: "Contact Us", route: "/contact" },
   { term: "Pay Rent", route: "/payrent" },
   { term: "Blog Articles", route: "/blog" },
   { term: "Enquiry Form", route: "/enquiry" },
@@ -40,7 +40,7 @@ const PAGES_AND_SEARCH_TERMS = [
   { term: "Developer Plans", route: "/developer" },
   { term: "Broker Plans", route: "/broker" },
   { term: "Owner Plans", route: "/owner" },
-  { term: "Premium Plans", route: "/premiumplans" },
+  { term: "Premium Plans", route: "/primium" },
   { term: "Pricing", route: "/pricing" },
   { term: "Company Overview", route: "/companyoverview" },
   { term: "Leadership Team", route: "/leadershipteam" },
@@ -341,36 +341,37 @@ function Navbar() {
                   {/* Developer Links */}
                   {[
                     {
-                      name: "Godrej Properties (Mumbai)",
-                      desc: "Godrej City Panvel Township",
-                      url: "https://www.godrejs-citypanvel.net/",
-                      badge: "Mumbai",
+                      name: "Mahindra Lifespaces",
+                      desc: "Roots & Vivante • Kandivali & Andheri",
+                      route: "/properties",
+                      badge: "Mumbai West",
                     },
                     {
-                      name: "JP Infra",
-                      desc: "North Garden City • Mira Road",
-                      url: "https://www.jpinfra.com/",
+                      name: "Ace Group",
+                      desc: "The Ace Sky Residences • Goregaon",
+                      route: "/properties",
                       badge: "Top Builder",
                     },
                     {
-                      name: "Sonam Group",
-                      desc: "Indralok & Beverly Park Towers",
-                      url: "https://sonamgroup.com/",
-                      badge: "Popular",
+                      name: "The House of Abhinandan Lodha",
+                      desc: "The Sarayu • 7-Star Ayodhya Land",
+                      route: "/properties",
+                      badge: "Ayodhya Flagship",
                     },
                     {
-                      name: "Mahindra Lifespaces",
-                      desc: "Roots & Green Eco Homes",
-                      url: "https://www.mahindralifespaces.com/",
-                      badge: "Sustainable",
+                      name: "Lodha Group",
+                      desc: "Lodha Woods • Borivali West",
+                      route: "/properties",
+                      badge: "Prime Luxury",
                     },
                   ].map((dev) => (
-                    <a
+                    <button
                       key={dev.name}
-                      href={dev.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2.5 flex items-center justify-between hover:bg-amber-50/80 transition-colors group cursor-pointer"
+                      onClick={() => {
+                        navigate(dev.route);
+                        setPropertyDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 flex items-center justify-between hover:bg-amber-50/80 transition-colors group cursor-pointer"
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 group-hover:text-amber-700">
@@ -381,8 +382,8 @@ function Navbar() {
                         </div>
                         <span className="text-xs text-gray-500">{dev.desc}</span>
                       </div>
-                      <ExternalLink size={14} className="text-gray-400 group-hover:text-amber-600 transition-transform group-hover:translate-x-0.5" />
-                    </a>
+                      <ChevronDown size={14} className="text-gray-400 -rotate-90 group-hover:text-amber-600 transition-transform group-hover:translate-x-0.5" />
+                    </button>
                   ))}
 
                   <div className="my-1 border-t border-gray-100" />

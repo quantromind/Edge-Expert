@@ -39,6 +39,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import projectsData from "./ProjectData";
 
 const ProjectDetails = () => {
   const { id } = useParams();
@@ -52,11 +53,11 @@ const ProjectDetails = () => {
 
   // Handle call button click
   const handleCallClick = () => {
-    const phoneNumber = property.agent.phone;
+    const phoneNumber = property?.agent?.phone || "+91 73853 27808";
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-      window.open(`tel:${phoneNumber}`);
+      window.open(`tel:${phoneNumber.replace(/\s+/g, '')}`);
     } else {
       navigator.clipboard.writeText(phoneNumber);
       alert(`Phone number ${phoneNumber} copied to clipboard!`);
@@ -65,19 +66,21 @@ const ProjectDetails = () => {
 
   // Handle email button click
   const handleEmailClick = () => {
-    const subject = encodeURIComponent(`Inquiry about ${property.title}`);
+    const agentEmail = property?.agent?.email || "sales@edgeexpert.com";
+    const agentName = property?.agent?.name || "Agent";
+    const subject = encodeURIComponent(`Inquiry about ${property?.title || "Property"}`);
     const propertyLink = window.location.href;
     const body = encodeURIComponent(
-      `Hello ${property.agent.name},\n\n` +
-      `I am interested in: ${property.title}\n` +
-      `Location: ${property.location}\n` +
-      `Price: ${property.price}\n\n` +
+      `Hello ${agentName},\n\n` +
+      `I am interested in: ${property?.title || "this project"}\n` +
+      `Location: ${property?.location || "N/A"}\n` +
+      `Price: ${property?.price || "N/A"}\n\n` +
       `Property Link: ${propertyLink}\n\n` +
       `Please provide more details.\n\n` +
       `Best regards`
     );
     
-    const mailtoLink = `mailto:${property.agent.email}?subject=${subject}&body=${body}`;
+    const mailtoLink = `mailto:${agentEmail}?subject=${subject}&body=${body}`;
     window.open(mailtoLink);
   };
 
@@ -120,71 +123,185 @@ const ProjectDetails = () => {
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/newprojects");
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-          const foundProject = data.data.find(item => item._id === id);
-          if (foundProject) {
-            const transformedProperty = {
-              id: foundProject._id,
-              title: foundProject.title,
-              location: foundProject.location,
-              price: `₹${(foundProject.startprice / 10000000).toFixed(2)} - ₹${(foundProject.endprice / 10000000).toFixed(2)} Cr`,
-              images: foundProject.images || ["/no-image.jpg"],
-              tags: [foundProject.propertystatus || "Available", foundProject.type || "Residential"],
-              purpose: "Sale",
-              overview: {
-                description: foundProject.description || `Beautiful property located in ${foundProject.location}. This property offers modern amenities and excellent connectivity.`,
-                longDescription: foundProject.description ? `${foundProject.description} This property features contemporary design with premium finishes and is situated in a prime location with easy access to major landmarks.` : "This property features contemporary design with premium finishes and is situated in a prime location with easy access to major landmarks.",
-                keyPoints: foundProject.amenities 
-                  ? foundProject.amenities.split(',').map(item => item.trim()).slice(0, 4)
-                  : ["Prime Location", "Modern Amenities", "Ready to Move", "Good Connectivity"]
-              },
-              details: {
-                type: foundProject.type || "Residential Property",
-                bhk: (() => {
-                  const title = foundProject.title || "";
-                  const type = foundProject.type || "";
-                  const bhkMatch = (title + " " + type).match(/(\d+)\s*BHK/i);
-                  return bhkMatch ? bhkMatch[1] : "N/A";
-                })(),
-                baths: "N/A",
-                superArea: foundProject.area || "N/A",
-                floor: "Multiple",
-                furnishing: foundProject.propertystatus || "N/A"
-              },
-              agent: {
-                name: foundProject.owner,
-                phone: foundProject.phone,
-                email: foundProject.email,
-                specialTag: "Property Owner",
-                rating: 4.5,
-                reviews: 25
-              },
-              amenitiesList: foundProject.amenities 
-                ? foundProject.amenities.split(',').map(item => item.trim())
-                : []
-            };
-            setProperty(transformedProperty);
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+        let foundProject = null;
+        let allProjects = [];
 
-            const otherProjects = data.data
-              .filter(item => item._id !== id)
+        try {
+          const response = await fetch(`${apiUrl}/newprojects`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data) {
+              allProjects = data.data;
+              foundProject = data.data.find(item => item._id === id || item.id === id);
+            }
+          }
+        } catch (e) {
+          console.warn("New projects fetch error:", e);
+        }
+
+        if (!foundProject) {
+          try {
+            const propRes = await fetch(`${apiUrl}/properties/${id}`);
+            if (propRes.ok) {
+              const propData = await propRes.json();
+              if (propData.success && propData.data) {
+                foundProject = propData.data;
+              }
+            }
+          } catch (e) {
+            console.warn("Direct properties fetch error:", e);
+          }
+        }
+
+        // Static Local Fallback from ProjectData.jsx
+        if (!foundProject && projectsData) {
+          const localItem = projectsData.find(item => item.id?.toString() === id?.toString());
+          if (localItem) {
+            foundProject = {
+              _id: localItem.id,
+              title: localItem.title,
+              location: localItem.location || `${localItem.city}, India`,
+              price: localItem.budget,
+              images: [localItem.image, ...(localItem.images || [])],
+              amenities: localItem.amenities || [],
+              description: localItem.description,
+              propertyType: localItem.category || "Residential",
+              type: localItem.type,
+              status: localItem.status,
+              bedrooms: localItem.specs?.bedrooms,
+              bathrooms: localItem.specs?.bathrooms,
+              area: localItem.specs?.area,
+              parking: localItem.specs?.parking,
+              builderName: localItem.developer || "Edge Expert Partner",
+              contactName: `${localItem.developer || "Builder"} Sales Desk`,
+              contactPhone: "+91 73853 27808",
+              contactEmail: "sales@edgeexpert.com",
+              postedByType: "Official Builder"
+            };
+          }
+        }
+
+        if (foundProject) {
+          let formattedPrice = "Price on Request";
+          if (foundProject.price) {
+            formattedPrice = foundProject.price >= 10000000 
+              ? `₹${(foundProject.price / 10000000).toFixed(2)} Cr` 
+              : `₹${(foundProject.price / 100000).toFixed(2)} L`;
+          } else if (foundProject.startprice && foundProject.endprice) {
+            formattedPrice = `₹${(foundProject.startprice / 10000000).toFixed(2)} - ₹${(foundProject.endprice / 10000000).toFixed(2)} Cr`;
+          } else if (foundProject.startprice) {
+            formattedPrice = `₹${(foundProject.startprice / 10000000).toFixed(2)} Cr`;
+          }
+
+          let amenitiesArray = [];
+          if (Array.isArray(foundProject.amenities)) {
+            amenitiesArray = foundProject.amenities.flatMap(item => 
+              typeof item === 'string' ? item.split(',').map(s => s.trim()).filter(Boolean) : [item]
+            );
+          } else if (typeof foundProject.amenities === 'string') {
+            amenitiesArray = foundProject.amenities.split(',').map(s => s.trim()).filter(Boolean);
+          }
+
+          const agentName = foundProject.contactName || 
+                            foundProject.postedBy?.name || 
+                            foundProject.owner || 
+                            foundProject.builderName || 
+                            "Edge Expert Agent";
+
+          const agentPhone = foundProject.contactPhone || 
+                             foundProject.postedBy?.phone || 
+                             foundProject.phone || 
+                             "+91 73853 27808";
+
+          const agentEmail = foundProject.contactEmail || 
+                             foundProject.postedBy?.email || 
+                             foundProject.email || 
+                             "contact@edgeexpert.com";
+
+          const specialTag = foundProject.postedByType || 
+                             (foundProject.postedBy?.role ? `${foundProject.postedBy.role.charAt(0).toUpperCase() + foundProject.postedBy.role.slice(1)}` : "Property Owner");
+
+          const transformedProperty = {
+            id: foundProject._id,
+            title: foundProject.title || "Premium Project",
+            location: foundProject.location || "Prime Location",
+            price: formattedPrice,
+            images: foundProject.images && foundProject.images.length > 0 ? foundProject.images : ["/no-image.jpg"],
+            tags: [
+              foundProject.propertystatus || foundProject.status || "Available", 
+              foundProject.type || foundProject.propertyType || "Residential"
+            ],
+            purpose: "Sale",
+            overview: {
+              description: foundProject.description || `Beautiful property located in ${foundProject.location || 'a prime location'}. This property offers modern amenities and excellent connectivity.`,
+              longDescription: foundProject.description 
+                ? `${foundProject.description} This property features contemporary design with premium finishes and is situated in a prime location with easy access to major landmarks.` 
+                : "This property features contemporary design with premium finishes and is situated in a prime location with easy access to major landmarks.",
+              keyPoints: amenitiesArray.length > 0
+                ? amenitiesArray.slice(0, 4)
+                : ["Prime Location", "Modern Amenities", "Ready to Move", "Good Connectivity"]
+            },
+            details: {
+              type: foundProject.type || foundProject.propertyType || "Residential Property",
+              bhk: (() => {
+                if (foundProject.bedrooms) return `${foundProject.bedrooms} BHK`;
+                const title = foundProject.title || "";
+                const type = foundProject.type || foundProject.propertyType || "";
+                const bhkMatch = (title + " " + type).match(/(\d+)\s*BHK/i);
+                return bhkMatch ? `${bhkMatch[1]} BHK` : "N/A";
+              })(),
+              baths: foundProject.bathrooms ? `${foundProject.bathrooms} Baths` : "N/A",
+              superArea: foundProject.area ? `${foundProject.area} sq.ft` : (foundProject.carpetArea ? `${foundProject.carpetArea} sq.ft` : "N/A"),
+              floor: foundProject.floor ? `${foundProject.floor}${foundProject.totalFloors ? ` of ${foundProject.totalFloors}` : ''}` : "Multiple",
+              furnishing: foundProject.furnishing || foundProject.propertystatus || "N/A"
+            },
+            agent: {
+              name: agentName,
+              phone: agentPhone,
+              email: agentEmail,
+              specialTag: specialTag,
+              rating: 4.8,
+              reviews: 25
+            },
+            amenitiesList: amenitiesArray
+          };
+          setProperty(transformedProperty);
+
+          if (allProjects.length > 0) {
+            const otherProjects = allProjects
+              .filter(item => item._id !== id && item.id !== id)
               .slice(0, 4)
               .map(item => ({
-                id: item._id,
+                id: item._id || item.id,
                 title: item.title,
                 location: item.location,
-                price: `₹${(item.startprice / 10000000).toFixed(2)} - ₹${(item.endprice / 10000000).toFixed(2)} Cr`,
+                price: item.price ? `₹${(item.price / 10000000).toFixed(2)} Cr` : `₹${((item.startprice || 0) / 10000000).toFixed(2)} - ₹${((item.endprice || 0) / 10000000).toFixed(2)} Cr`,
                 images: item.images || ["/no-image.jpg"],
                 details: {
-                  bhk: (() => {
+                  bhk: item.bedrooms ? `${item.bedrooms} BHK` : (() => {
                     const title = item.title || "";
                     const type = item.type || "";
                     const bhkMatch = (title + " " + type).match(/(\d+)\s*BHK/i);
                     return bhkMatch ? `${bhkMatch[1]} bed` : "N/A";
                   })(),
-                  baths: "N/A"
+                  baths: item.bathrooms ? `${item.bathrooms}` : "N/A"
+                }
+              }));
+            setSimilarProperties(otherProjects);
+          } else if (projectsData) {
+            const otherProjects = projectsData
+              .filter(item => item.id?.toString() !== id?.toString())
+              .slice(0, 4)
+              .map(item => ({
+                id: item.id,
+                title: item.title,
+                location: item.location,
+                price: item.budget,
+                images: [item.image],
+                details: {
+                  bhk: item.specs?.bedrooms ? `${item.specs.bedrooms} Beds` : "N/A",
+                  baths: item.specs?.bathrooms ? `${item.specs.bathrooms} Baths` : "N/A"
                 }
               }));
             setSimilarProperties(otherProjects);
@@ -724,26 +841,33 @@ const ProjectDetails = () => {
             <div className="lg:sticky lg:top-8 space-y-4 lg:space-y-6">
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">
-                    {property.agent.name
-                      ? property.agent.name.split(" ").map((n) => n[0]).join("")
-                      : "NA"}
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                    {property.agent?.name
+                      ? property.agent.name
+                          .split(" ")
+                          .filter(Boolean)
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : "EE"}
                   </div>
                   <div>
-                    <h4 className="text-gray-900 text-xl mb-1">{property.agent.name}</h4>
-                    <p className="text-gray-600 text-sm mb-2">{property.agent.specialTag}</p>
+                    <h4 className="text-gray-900 text-xl font-bold mb-1">{property.agent?.name || "Property Consultant"}</h4>
+                    <p className="text-gray-600 text-sm mb-2">{property.agent?.specialTag || "Verified Partner"}</p>
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${i < Math.floor(property.agent.rating)
+                          className={`w-4 h-4 ${
+                            i < Math.floor(property.agent?.rating || 4.5)
                               ? "text-yellow-400 fill-current"
                               : "text-gray-300"
-                            }`}
+                          }`}
                         />
                       ))}
                       <span className="text-sm text-gray-600 ml-2">
-                        ({property.agent.reviews} reviews)
+                        ({property.agent?.reviews || 25} reviews)
                       </span>
                     </div>
                   </div>
@@ -752,16 +876,16 @@ const ProjectDetails = () => {
                 <div className="space-y-3">
                   <button 
                     onClick={handleCallClick}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-medium"
                   >
                     <Phone className="w-5 h-5" />
                     {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                      ? `Call ${property.agent.phone}` 
-                      : `Copy ${property.agent.phone}`}
+                      ? `Call ${property.agent?.phone || "+91 98765 43210"}` 
+                      : `Copy ${property.agent?.phone || "+91 98765 43210"}`}
                   </button>
                   <button 
                     onClick={handleEmailClick}
-                    className="w-full border-2 border-blue-500 text-blue-500 hover:bg-blue-50 py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3"
+                    className="w-full border-2 border-blue-500 text-blue-500 hover:bg-blue-50 py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3 font-medium"
                   >
                     <Mail className="w-5 h-5" />
                     Email Agent

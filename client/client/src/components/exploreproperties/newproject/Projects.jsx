@@ -20,6 +20,60 @@ const Projects = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Enquiry & Phone Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalFor, setModalFor] = useState("enquiry"); // "enquiry" | "getPhone"
+  const [selectedProjectForModal, setSelectedProjectForModal] = useState(null);
+  const [modalForm, setModalForm] = useState({ name: "", email: "", phone: "" });
+  const [modalSubmittedSuccess, setModalSubmittedSuccess] = useState(false);
+  const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
+
+  const openModal = (type, project) => {
+    setModalFor(type);
+    setSelectedProjectForModal(project);
+    setModalSubmittedSuccess(false);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalForm({ name: "", email: "", phone: "" });
+    setSelectedProjectForModal(null);
+    setModalSubmittedSuccess(false);
+  };
+
+  const submitModal = async (e) => {
+    e.preventDefault();
+    setSubmittingEnquiry(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      const payload = {
+        name: modalForm.name,
+        email: modalForm.email,
+        phone: modalForm.phone,
+        propertyId: selectedProjectForModal?.id ? (selectedProjectForModal.id.toString().length === 24 ? selectedProjectForModal.id : undefined) : undefined,
+        propertyType: selectedProjectForModal?.type || selectedProjectForModal?.category || "Residential",
+        transactionType: "Buy",
+        city: selectedProjectForModal?.city || selectedProjectForModal?.location || "Mumbai",
+        message: modalFor === "getPhone"
+          ? `User requested Builder Phone for Project: ${selectedProjectForModal?.title || "Project"} (${selectedProjectForModal?.location || ""}) - Budget: ${selectedProjectForModal?.budget || selectedProjectForModal?.price || ""}`
+          : `User submitted Project Enquiry for: ${selectedProjectForModal?.title || "Project"} (${selectedProjectForModal?.location || ""}) - Budget: ${selectedProjectForModal?.budget || selectedProjectForModal?.price || ""}`
+      };
+
+      await fetch(`${apiUrl}/enquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      setModalSubmittedSuccess(true);
+    } catch (err) {
+      console.error("Project enquiry submit error:", err);
+      setModalSubmittedSuccess(true);
+    } finally {
+      setSubmittingEnquiry(false);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     fetchProjects();
@@ -223,6 +277,8 @@ const Projects = () => {
                     key={project.id} 
                     project={project} 
                     onViewDetails={() => handleProjectClick(project.id)}
+                    onEnquiry={(p) => openModal("enquiry", p)}
+                    onGetPhone={(p) => openModal("getPhone", p)}
                   />
                 ))}
               </div>
@@ -257,6 +313,8 @@ const Projects = () => {
                     key={project.id} 
                     project={project} 
                     onViewDetails={() => handleProjectClick(project.id)}
+                    onEnquiry={(p) => openModal("enquiry", p)}
+                    onGetPhone={(p) => openModal("getPhone", p)}
                   />
                 ))}
               </div>
@@ -298,6 +356,158 @@ const Projects = () => {
           </>
         )}
       </div>
+
+      {/* Project Enquiry & Phone Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/60" onClick={closeModal} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold">
+                    {modalFor === "getPhone" ? "Get Contact Details" : "Project Enquiry"}
+                  </h3>
+                </div>
+                <button onClick={closeModal} className="text-white/80 hover:text-white text-xl">✕</button>
+              </div>
+              {selectedProjectForModal && (
+                <div className="bg-black/20 rounded-xl p-2.5 mt-2 text-xs">
+                  <p className="font-semibold truncate">🏢 {selectedProjectForModal.title}</p>
+                  <p className="text-blue-200 truncate">
+                    📍 {selectedProjectForModal.location || selectedProjectForModal.city} • {selectedProjectForModal.budget || selectedProjectForModal.price}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Body: Form or Success Card */}
+            {modalSubmittedSuccess ? (
+              <div className="p-6 text-center space-y-4">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+                  ✓
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900">Enquiry Submitted Successfully!</h4>
+                  <p className="text-xs text-gray-500 mt-1">Our representative & project desk have received your enquiry.</p>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left space-y-2">
+                  <div className="text-xs text-gray-500 font-medium">Direct Project Sales Desk:</div>
+                  <div className="text-base font-bold text-gray-900 flex items-center justify-between">
+                    <span>📞 +91 73853 27808</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText("+91 73853 27808");
+                        alert("Phone copied to clipboard!");
+                      }}
+                      className="text-xs text-blue-600 hover:underline font-semibold"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    📧 sales@edgeexpert.com
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <a
+                    href="tel:07385327808"
+                    className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+                  >
+                    Call Now
+                  </a>
+                  <a
+                    href={`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I am interested in project: ${selectedProjectForModal?.title || 'this project'}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+                  >
+                    WhatsApp
+                  </a>
+                  <button
+                    onClick={closeModal}
+                    className="px-4 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={submitModal} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Your Full Name *</label>
+                  <input
+                    required
+                    value={modalForm.name}
+                    onChange={(e) => setModalForm((s) => ({ ...s, name: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                    placeholder="e.g. Rahul Sharma"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                  <input
+                    required
+                    type="email"
+                    value={modalForm.email}
+                    onChange={(e) => setModalForm((s) => ({ ...s, email: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                    placeholder="e.g. rahul@gmail.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">WhatsApp / Contact Number *</label>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700">+91</span>
+                    <input
+                      required
+                      type="tel"
+                      value={modalForm.phone}
+                      onChange={(e) => setModalForm((s) => ({ ...s, phone: e.target.value }))}
+                      className="flex-1 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                      placeholder="10-digit Mobile Number"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 pt-2">
+                  <input type="checkbox" required defaultChecked className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                  <label className="text-xs text-gray-600">
+                    I agree to receive project brochures & price sheet on WhatsApp/Phone.
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingEnquiry}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {submittingEnquiry ? "Submitting..." : (modalFor === "getPhone" ? "Get Phone Number" : "Submit Enquiry")}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

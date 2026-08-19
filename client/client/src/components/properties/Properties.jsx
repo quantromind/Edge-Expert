@@ -12,6 +12,15 @@ const formatRupee = (n) => {
   return num.toLocaleString("en-IN");
 };
 
+const formatRupeeShort = (n) => {
+  if (n === undefined || n === null || n === "") return "N/A";
+  const num = Number(n);
+  if (Number.isNaN(num)) return "N/A";
+  if (num >= 10000000) return `${(num / 10000000).toFixed(num % 10000000 === 0 ? 0 : 2)} Cr`;
+  if (num >= 100000) return `${(num / 100000).toFixed(num % 100000 === 0 ? 0 : 2)} L`;
+  return num.toLocaleString("en-IN");
+};
+
 const Properties = () => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,10 +32,10 @@ const Properties = () => {
   const [city, setCity] = useState("");
   const [selectedLocalities, setSelectedLocalities] = useState([]);
   const [selectedPropertyTypes, setSelectedPropertyTypes] = useState([]);
-  const [sliderMin, setSliderMin] = useState(100000);
-  const [sliderMax, setSliderMax] = useState(10000000);
-  const [appliedMin, setAppliedMin] = useState(100000);
-  const [appliedMax, setAppliedMax] = useState(10000000);
+  const [sliderMin, setSliderMin] = useState(500000);
+  const [sliderMax, setSliderMax] = useState(150000000);
+  const [appliedMin, setAppliedMin] = useState(500000);
+  const [appliedMax, setAppliedMax] = useState(150000000);
   const [selectedBHK, setSelectedBHK] = useState([]);
   const [selectedPostedBy, setSelectedPostedBy] = useState([]);
 
@@ -39,10 +48,22 @@ const Properties = () => {
   const [amenViewAll, setAmenViewAll] = useState({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const sampleCities = ["Pune", "Mumbai", "Bengaluru", "Hyderabad"];
-  const sampleTopLocalities = ["Baner", "Aundh", "Kharadi", "Wakad", "Hinjewadi", "Hadapsar"];
-  const postedByOptions = ["Owner", "Builder", "Agent"];
-  const bhkOptions = ["1 RK", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"];
+  const sampleCities = ["Mumbai", "Ayodhya", "Thane", "Navi Mumbai"];
+  const sampleTopLocalities = [
+    "Andheri West",
+    "Bandra West",
+    "Goregaon West",
+    "Kandivali West",
+    "Borivali West",
+    "Malad West",
+    "Dahisar West",
+    "BKC",
+    "Chandivali",
+    "Sarayu Riverfront, Ayodhya",
+    "Ram Mandir Corridor, Ayodhya",
+  ];
+  const postedByOptions = ["Builder", "Owner", "Agent"];
+  const bhkOptions = ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK", "Plots / Land"];
 
   useEffect(() => {
     setTimeout(() => {
@@ -56,12 +77,7 @@ const Properties = () => {
   const fetchProperties = async (tab = "BUY") => {
     setLoading(true);
     try {
-      let apiUrl;
-      if (tab === "RENT") {
-        apiUrl = `${import.meta.env.VITE_API_URL}/properties`;
-      } else {
-        apiUrl = `${import.meta.env.VITE_API_URL}/sellproperty`;
-      }
+      const apiUrl = `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/sellproperty`;
       const res = await fetch(apiUrl);
       const result = await res.json();
 
@@ -125,33 +141,30 @@ const Properties = () => {
 
   const tabs = ["BUY", "RENT", "SELL"];
 
-
   const handleTabClick = (tab) => {
-  if (tab === "BUY") {
-    setActiveTab("BUY");
-    setTransactionType("Buy");
-    clearAll();
-    navigate("/buyproperties"); // optional if you want buy page
-  } 
-  else if (tab === "RENT") {
-    setActiveTab("RENT");
-    setTransactionType("Rent");
-    clearAll();
-    navigate("/rentproperties");  // 👈 added navigation
-  } 
-  else if (tab === "SELL") {
-    navigate("/sellproperties");
-  }
-};
+    if (tab === "BUY") {
+      setActiveTab("BUY");
+      setTransactionType("Buy");
+      clearAll();
+      navigate("/properties");
+    } else if (tab === "RENT") {
+      setActiveTab("RENT");
+      setTransactionType("Rent");
+      clearAll();
+      navigate("/rentproperties");
+    } else if (tab === "SELL") {
+      navigate("/sellproperties");
+    }
+  };
 
   const clearAll = () => {
     setCity("");
     setSelectedLocalities([]);
     setSelectedPropertyTypes([]);
-    setSliderMin(100000);
-    setSliderMax(10000000);
-    setAppliedMin(100000);
-    setAppliedMax(10000000);
+    setSliderMin(500000);
+    setSliderMax(150000000);
+    setAppliedMin(500000);
+    setAppliedMax(150000000);
     setSelectedBHK([]);
     setSelectedPostedBy([]);
   };
@@ -164,6 +177,18 @@ const Properties = () => {
     setAppliedMax(b);
     setOpenDropdown(null);
   };
+
+  const setBudgetPreset = (min, max) => {
+    setSliderMin(min);
+    setSliderMax(max);
+    setAppliedMin(min);
+    setAppliedMax(max);
+    setOpenDropdown(null);
+  };
+
+  const [selectedPropertyForModal, setSelectedPropertyForModal] = useState(null);
+  const [modalSubmittedSuccess, setModalSubmittedSuccess] = useState(false);
+  const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
 
   const prevSlide = (prop) => {
     const imgs = prop.images || [];
@@ -179,46 +204,96 @@ const Properties = () => {
 
   const goTo = (id, i) => setCarouselIndex((p) => ({ ...p, [id]: i }));
 
-  const openModal = (type) => {
+  const openModal = (type, prop = null) => {
     setModalFor(type);
+    setSelectedPropertyForModal(prop);
+    setModalSubmittedSuccess(false);
     setIsModalOpen(true);
   };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setModalForm({ name: "", email: "", phone: "" });
+    setSelectedPropertyForModal(null);
+    setModalSubmittedSuccess(false);
   };
-  const submitModal = (e) => {
+
+  const submitModal = async (e) => {
     e.preventDefault();
-    closeModal();
-    alert("Form submitted (frontend only).");
+    setSubmittingEnquiry(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      const payload = {
+        name: modalForm.name,
+        email: modalForm.email,
+        phone: modalForm.phone,
+        propertyId: selectedPropertyForModal?._id || undefined,
+        propertyType: selectedPropertyForModal?.propertyType || selectedPropertyForModal?.type || "Residential",
+        transactionType: selectedPropertyForModal?.transactionType || "Buy",
+        city: selectedPropertyForModal?.city || selectedPropertyForModal?.location || "Mumbai",
+        message: modalFor === "getPhone"
+          ? `User requested contact number for: ${selectedPropertyForModal?.title || "Property"} (${selectedPropertyForModal?.location || "Mumbai West"}) - Budget: ₹ ${formatRupee(selectedPropertyForModal?.price)}`
+          : `User clicked Contact Owner for: ${selectedPropertyForModal?.title || "Property"} (${selectedPropertyForModal?.location || "Mumbai West"}) - Budget: ₹ ${formatRupee(selectedPropertyForModal?.price)}`
+      };
+
+      const res = await fetch(`${apiUrl}/enquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setModalSubmittedSuccess(true);
+      } else {
+        setModalSubmittedSuccess(true); // Still allow user to view contact
+      }
+    } catch (err) {
+      console.error("Enquiry submit error:", err);
+      setModalSubmittedSuccess(true);
+    } finally {
+      setSubmittingEnquiry(false);
+    }
   };
 
   const filtered = properties.filter((p) => {
     const price = Number(p.price || 0);
-    if (!Number.isNaN(price) && (appliedMin !== 100000 || appliedMax !== 10000000)) {
+    if (!Number.isNaN(price) && (appliedMin !== 500000 || appliedMax !== 150000000)) {
       if (appliedMin && price < appliedMin) return false;
       if (appliedMax && price > appliedMax) return false;
     }
 
-    if (city && city.trim() && p.location && !p.location.toLowerCase().includes(city.toLowerCase())) return false;
+    if (city && city.trim() && p.city && !p.city.toLowerCase().includes(city.toLowerCase()) && !p.location?.toLowerCase().includes(city.toLowerCase())) return false;
+
+    if (selectedLocalities.length > 0) {
+      const matchLoc = selectedLocalities.some(loc => 
+        (p.location && p.location.toLowerCase().includes(loc.toLowerCase())) ||
+        (p.address && p.address.toLowerCase().includes(loc.toLowerCase())) ||
+        (p.title && p.title.toLowerCase().includes(loc.toLowerCase()))
+      );
+      if (!matchLoc) return false;
+    }
 
     if (selectedPropertyTypes.length > 0) {
+      const propType = (p.propertyType || p.type || "").toLowerCase();
       const hasMatchingType = selectedPropertyTypes.some(type => {
-        if (type === "Flat" && (p.type?.toLowerCase().includes("flat") || p.type?.toLowerCase().includes("apartment") || p.type?.toLowerCase().includes("bhk"))) return true;
-        if (type === "House/Villa" && (p.type?.toLowerCase().includes("house") || p.type?.toLowerCase().includes("villa"))) return true;
-        if (type === "Plot/Land" && (p.type?.toLowerCase().includes("plot") || p.type?.toLowerCase().includes("land"))) return true;
-        if (type === "Office Space" && p.type?.toLowerCase().includes("office")) return true;
-        if (type === "Shop/Showroom" && (p.type?.toLowerCase().includes("shop") || p.type?.toLowerCase().includes("showroom"))) return true;
-        if (type === "Commercial Land" && p.type?.toLowerCase().includes("commercial")) return true;
-        if (type === "Warehouse/Godown" && (p.type?.toLowerCase().includes("warehouse") || p.type?.toLowerCase().includes("godown"))) return true;
-        return false;
+        const t = type.toLowerCase();
+        if (t === "flat" || t.includes("apartment")) return propType.includes("flat") || propType.includes("apartment");
+        if (t === "penthouse") return propType.includes("penthouse") || p.title?.toLowerCase().includes("penthouse");
+        if (t.includes("villa") || t.includes("house")) return propType.includes("villa") || propType.includes("house");
+        if (t.includes("plot") || t.includes("land")) return propType.includes("plot") || propType.includes("land");
+        if (t.includes("office")) return propType.includes("office");
+        if (t.includes("shop")) return propType.includes("shop") || propType.includes("showroom");
+        if (t.includes("commercial")) return propType.includes("commercial") || propType.includes("office");
+        return propType.includes(t);
       });
       if (!hasMatchingType) return false;
     }
 
     if (selectedBHK.length > 0) {
       const hasMatchingBHK = selectedBHK.some(bhk => {
+        if (bhk === "Plots / Land") return p.propertyType?.toLowerCase().includes("plot") || p.propertyType?.toLowerCase().includes("land");
         const bhkNumber = bhk.replace(/[^0-9]/g, '');
+        if (p.bedrooms && p.bedrooms.toString() === bhkNumber) return true;
         return p.title?.toLowerCase().includes(bhk.toLowerCase()) ||
           p.type?.toLowerCase().includes(bhk.toLowerCase()) ||
           p.title?.includes(bhkNumber + "bhk") ||
@@ -229,8 +304,8 @@ const Properties = () => {
 
     if (selectedPostedBy.length > 0) {
       const hasMatchingPostedBy = selectedPostedBy.some(postedBy => {
-        return p.owner?.toLowerCase().includes(postedBy.toLowerCase()) ||
-          p.postedBy?.toLowerCase().includes(postedBy.toLowerCase());
+        const pbType = (p.postedByType || p.postedBy?.role || p.owner || "").toLowerCase();
+        return pbType.includes(postedBy.toLowerCase());
       });
       if (!hasMatchingPostedBy) return false;
     }
@@ -240,33 +315,30 @@ const Properties = () => {
 
   const fallbackImage = "https://cdn-icons-png.flaticon.com/512/2748/2748558.png";
 
-  // Filter component to avoid repetition
+  // Filter component with dynamic titles & active indicators
   const FilterSection = () => (
-    <div className="bg-white rounded-lg shadow-sm border p-4 mb-6" ref={dropdownRef}>
-      <div className="flex flex-wrap gap-3">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 mb-6" ref={dropdownRef}>
+      <div className="flex flex-wrap items-center gap-3">
         {/* Transaction Type */}
         <div className="relative" data-filter-button>
           <button
             onClick={() => setOpenDropdown((o) => (o === "buy" ? null : "buy"))}
-            className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium"
+            className="flex items-center gap-2 rounded-full px-4 py-2 border bg-blue-50 text-blue-700 font-semibold shadow-sm transition-all"
             style={{ borderColor: THEME_BLUE }}
           >
             {transactionType}
             <span className="text-sm">▾</span>
           </button>
           {openDropdown === "buy" && (
-            <div className="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border p-4 z-10">
-              <div className="text-sm font-semibold mb-2">Transaction</div>
+            <div className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border p-4 z-20">
+              <div className="text-sm font-semibold mb-2 text-gray-700">Transaction Type</div>
               <div className="flex gap-2">
-                <button onClick={() => setTransactionType("Buy")} className="px-3 py-1.5 rounded-full border text-sm bg-white text-black" style={{ borderColor: THEME_BLUE }}>
+                <button onClick={() => { setTransactionType("Buy"); setOpenDropdown(null); }} className="flex-1 px-3 py-1.5 rounded-full border text-sm font-medium bg-blue-500 text-white shadow-sm">
                   Buy
                 </button>
-                <button onClick={() => setTransactionType("Rent")} className="px-3 py-1.5 rounded-full border text-sm bg-white text-black" style={{ borderColor: THEME_BLUE }}>
+                <button onClick={() => { setTransactionType("Rent"); navigate("/rentproperties"); }} className="flex-1 px-3 py-1.5 rounded-full border text-sm text-gray-700 hover:bg-gray-100">
                   Rent
                 </button>
-              </div>
-              <div className="mt-3 text-right">
-                <button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button>
               </div>
             </div>
           )}
@@ -276,26 +348,39 @@ const Properties = () => {
         <div className="relative" data-filter-button>
           <button
             onClick={() => setOpenDropdown((o) => (o === "city" ? null : "city"))}
-            className="flex items-center gap-3 rounded-full px-4 py-2 border bg-white text-black font-medium"
-            style={{ borderColor: THEME_BLUE }}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              city ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
           >
-            <span className="text-sm">{city || "All Cities"}</span>
-            <span className="text-xs text-gray-400">▾</span>
+            <span>{city || "All Cities"}</span>
+            <span className="text-xs">▾</span>
           </button>
           {openDropdown === "city" && (
-            <div className="absolute left-0 mt-3 w-[520px] max-h-[420px] bg-white rounded-lg shadow-lg border overflow-auto p-6 z-10">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="inline-block px-3 py-1 text-sm rounded-full bg-blue-50 text-black">{city} ✕</span>
-                <input className="flex-1 border rounded-md px-3 py-2 text-sm" placeholder="Add city" />
+            <div className="absolute left-0 mt-3 w-80 bg-white rounded-xl shadow-xl border p-5 z-20">
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="font-semibold text-sm text-gray-800">Select City</h4>
+                {city && <button onClick={() => setCity("")} className="text-xs text-red-500 font-medium">Reset</button>}
               </div>
-              <div>
-                <h4 className="font-semibold text-sm mb-2">Top Cities</h4>
-                <div className="grid grid-cols-2 gap-2">{sampleCities.map((c) => (
-                  <button key={c} onClick={() => setCity(c)} className={`text-left px-3 py-2 rounded-md border ${c === city ? "bg-blue-50 text-black border-blue-200" : "bg-white text-gray-700 border-gray-200"}`}>{c}</button>
-                ))}</div>
-              </div>
-              <div className="mt-6 text-right">
-                <button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => { setCity(""); setOpenDropdown(null); }}
+                  className={`text-left px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                    !city ? "bg-blue-500 text-white border-blue-500" : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  All Cities
+                </button>
+                {sampleCities.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { setCity(c); setOpenDropdown(null); }}
+                    className={`text-left px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      c === city ? "bg-blue-500 text-white border-blue-500" : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -305,22 +390,47 @@ const Properties = () => {
         <div className="relative" data-filter-button>
           <button
             onClick={() => setOpenDropdown((o) => (o === "localities" ? null : "localities"))}
-            className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium"
-            style={{ borderColor: THEME_BLUE }}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              selectedLocalities.length > 0 ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
           >
-            Top Localities
+            <span>
+              {selectedLocalities.length === 0
+                ? "Top Localities"
+                : selectedLocalities.length === 1
+                ? selectedLocalities[0]
+                : `${selectedLocalities[0]} +${selectedLocalities.length - 1}`}
+            </span>
             <span className="text-sm">▾</span>
           </button>
           {openDropdown === "localities" && (
-            <div className="absolute left-0 mt-3 w-[520px] bg-white rounded-lg shadow-lg border p-6 z-10">
-              <h4 className="font-semibold mb-3">Top Localities</h4>
-              <div className="flex gap-3 flex-wrap">{sampleTopLocalities.map((l) => (
-                <button key={l} onClick={() => toggleLocality(l)} className={`px-3 py-1.5 rounded-full border text-sm ${selectedLocalities.includes(l) ? "bg-blue-50 text-black border-blue-200" : "bg-white text-black border-black"}`} style={{ borderColor: THEME_BLUE }}>
-                  {selectedLocalities.includes(l) ? "✓ " : "+ "} {l}
-                </button>
-              ))}</div>
-              <div className="mt-6 text-right">
-                <button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button>
+            <div className="absolute left-0 mt-3 w-[460px] bg-white rounded-xl shadow-xl border p-5 z-20">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-bold text-gray-900 text-sm">Mumbai West & Ayodhya Localities</h4>
+                {selectedLocalities.length > 0 && (
+                  <button onClick={() => setSelectedLocalities([])} className="text-xs text-red-500 font-medium">Clear</button>
+                )}
+              </div>
+              <div className="flex gap-2 flex-wrap max-h-60 overflow-y-auto pr-1">
+                {sampleTopLocalities.map((l) => {
+                  const isSelected = selectedLocalities.includes(l);
+                  return (
+                    <button
+                      key={l}
+                      onClick={() => toggleLocality(l)}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {isSelected ? "✓ " : "+ "} {l}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 pt-3 border-t flex justify-end">
+                <button onClick={() => setOpenDropdown(null)} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">Done</button>
               </div>
             </div>
           )}
@@ -328,30 +438,80 @@ const Properties = () => {
 
         {/* Budget */}
         <div className="relative" data-filter-button>
-          <button onClick={() => setOpenDropdown((o) => (o === "budget" ? null : "budget"))} className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium" style={{ borderColor: THEME_BLUE }}>
-            Budget
+          <button
+            onClick={() => setOpenDropdown((o) => (o === "budget" ? null : "budget"))}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              (appliedMin !== 500000 || appliedMax !== 150000000)
+                ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold"
+                : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span>
+              {(appliedMin !== 500000 || appliedMax !== 150000000)
+                ? `₹${formatRupeeShort(appliedMin)} - ₹${formatRupeeShort(appliedMax)}`
+                : "Budget"}
+            </span>
             <span className="text-sm">▾</span>
           </button>
           {openDropdown === "budget" && (
-            <div className="absolute left-0 mt-3 w-[520px] bg-white rounded-lg shadow-lg border p-6 z-10">
-              <h4 className="font-semibold mb-3">Budget (₹)</h4>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="text-sm text-gray-700">Min: <strong>₹ {formatRupee(sliderMin)}</strong></div>
-                <div className="text-sm text-gray-700">Max: <strong>₹ {formatRupee(sliderMax)}</strong></div>
+            <div className="absolute left-0 mt-3 w-[440px] bg-white rounded-xl shadow-xl border p-5 z-20">
+              <h4 className="font-bold text-gray-900 text-sm mb-3">Filter by Budget (₹)</h4>
+              
+              {/* Quick Presets */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <button onClick={() => setBudgetPreset(500000, 10000000)} className="px-2 py-1.5 border rounded-lg text-xs font-medium hover:bg-blue-50 text-gray-700">
+                  &lt; ₹1 Cr
+                </button>
+                <button onClick={() => setBudgetPreset(10000000, 25000000)} className="px-2 py-1.5 border rounded-lg text-xs font-medium hover:bg-blue-50 text-gray-700">
+                  ₹1 Cr - ₹2.5 Cr
+                </button>
+                <button onClick={() => setBudgetPreset(25000000, 50000000)} className="px-2 py-1.5 border rounded-lg text-xs font-medium hover:bg-blue-50 text-gray-700">
+                  ₹2.5 Cr - ₹5 Cr
+                </button>
+                <button onClick={() => setBudgetPreset(50000000, 150000000)} className="px-2 py-1.5 border rounded-lg text-xs font-medium hover:bg-blue-50 text-gray-700">
+                  ₹5 Cr+
+                </button>
+                <button onClick={() => setBudgetPreset(500000, 150000000)} className="col-span-2 px-2 py-1.5 border rounded-lg text-xs font-medium bg-gray-50 text-gray-700">
+                  All Budgets
+                </button>
               </div>
-              <div className="relative mb-4">
-                <div className="h-2 rounded-full bg-gray-200"></div>
-                <div className="absolute top-0 h-2 rounded-full" style={{
-                  backgroundColor: THEME_BLUE,
-                  left: `${((Math.min(sliderMin, sliderMax) - 100000) / (10000000 - 100000)) * 100}%`,
-                  right: `${100 - ((Math.max(sliderMin, sliderMax) - 100000) / (10000000 - 100000)) * 100}%`
-                }} />
-                <input type="range" min={100000} max={10000000} step={10000} value={sliderMin} onChange={(e) => setSliderMin(Number(e.target.value) <= sliderMax ? Number(e.target.value) : sliderMax)} className="absolute top-0 left-0 w-full appearance-none" />
-                <input type="range" min={100000} max={10000000} step={10000} value={sliderMax} onChange={(e) => setSliderMax(Number(e.target.value) >= sliderMin ? Number(e.target.value) : sliderMin)} className="absolute top-0 left-0 w-full appearance-none" />
+
+              <div className="flex items-center justify-between text-xs text-gray-600 mb-2 font-medium">
+                <div>Min: <strong className="text-blue-600 font-bold">₹{formatRupeeShort(sliderMin)}</strong></div>
+                <div>Max: <strong className="text-blue-600 font-bold">₹{formatRupeeShort(sliderMax)}</strong></div>
               </div>
-              <div className="flex justify-between items-center mt-4">
-                <button onClick={() => { setSliderMin(100000); setSliderMax(10000000); setAppliedMin(100000); setAppliedMax(10000000); }} className="text-red-500 font-medium">Clear All</button>
-                <div className="flex items-center gap-3"><button onClick={applyBudget} className="px-4 py-2 rounded-full" style={{ backgroundColor: THEME_BLUE, color: "white" }}>Apply</button></div>
+
+              <div className="space-y-2 mb-4">
+                <input
+                  type="range"
+                  min={500000}
+                  max={150000000}
+                  step={500000}
+                  value={sliderMin}
+                  onChange={(e) => setSliderMin(Math.min(Number(e.target.value), sliderMax - 500000))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <input
+                  type="range"
+                  min={500000}
+                  max={150000000}
+                  step={500000}
+                  value={sliderMax}
+                  onChange={(e) => setSliderMax(Math.max(Number(e.target.value), sliderMin + 500000))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+              </div>
+
+              <div className="flex justify-between items-center pt-2 border-t">
+                <button
+                  onClick={() => { setSliderMin(500000); setSliderMax(150000000); setAppliedMin(500000); setAppliedMax(150000000); setOpenDropdown(null); }}
+                  className="text-xs text-red-500 font-semibold"
+                >
+                  Reset
+                </button>
+                <button onClick={applyBudget} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">
+                  Apply Budget
+                </button>
               </div>
             </div>
           )}
@@ -359,55 +519,176 @@ const Properties = () => {
 
         {/* Property Type */}
         <div className="relative" data-filter-button>
-          <button onClick={() => setOpenDropdown((o) => (o === "flat" ? null : "flat"))} className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium" style={{ borderColor: THEME_BLUE }}>
-            Flat +2
-            <span className="text-xs bg-blue-50 px-2 rounded-full text-black">✕</span>
+          <button
+            onClick={() => setOpenDropdown((o) => (o === "type" ? null : "type"))}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              selectedPropertyTypes.length > 0 ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span>
+              {selectedPropertyTypes.length === 0
+                ? "Property Type"
+                : selectedPropertyTypes.length === 1
+                ? selectedPropertyTypes[0]
+                : `${selectedPropertyTypes[0]} +${selectedPropertyTypes.length - 1}`}
+            </span>
+            {selectedPropertyTypes.length > 0 ? (
+              <span
+                onClick={(e) => { e.stopPropagation(); setSelectedPropertyTypes([]); }}
+                className="text-xs bg-blue-200 text-blue-800 px-1.5 py-0.5 rounded-full hover:bg-blue-300 ml-1"
+              >
+                ✕
+              </span>
+            ) : (
+              <span className="text-sm">▾</span>
+            )}
           </button>
-          {openDropdown === "flat" && (
-            <div className="absolute left-0 mt-3 w-[520px] bg-white rounded-lg shadow-lg border p-6 z-10">
-              <h4 className="font-semibold mb-3">Residential</h4>
-              <div className="flex gap-3 flex-wrap mb-4">{["Flat", "House/Villa", "Plot/Land"].map((t) => (
-                <button key={t} onClick={() => togglePropertyType(t)} className={`px-3 py-1.5 rounded-full border text-sm ${selectedPropertyTypes.includes(t) ? "bg-blue-50 text-black border-blue-200" : "bg-white text-black border-black"}`} style={{ borderColor: THEME_BLUE }}>{selectedPropertyTypes.includes(t) ? "✓ " : "+ "} {t}</button>
-              ))}</div>
-              <h4 className="font-semibold mb-3">Commercial</h4>
-              <div className="flex gap-3 flex-wrap mb-4">{["Office Space", "Shop/Showroom", "Commercial Land", "Warehouse/Godown"].map((t) => (
-                <button key={t} onClick={() => togglePropertyType(t)} className={`px-3 py-1.5 rounded-full border text-sm ${selectedPropertyTypes.includes(t) ? "bg-blue-50 text-black border-blue-200" : "bg-white text-black border-black"}`} style={{ borderColor: THEME_BLUE }}>{selectedPropertyTypes.includes(t) ? "✓ " : "+ "} {t}</button>
-              ))}</div>
-              <div className="mt-6 text-right"><button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button></div>
+          {openDropdown === "type" && (
+            <div className="absolute left-0 mt-3 w-[460px] bg-white rounded-xl shadow-xl border p-5 z-20">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-bold text-gray-900 text-sm">Residential</h4>
+                {selectedPropertyTypes.length > 0 && (
+                  <button onClick={() => setSelectedPropertyTypes([])} className="text-xs text-red-500 font-medium">Clear</button>
+                )}
+              </div>
+              <div className="flex gap-2 flex-wrap mb-4">
+                {["Flat", "Penthouse", "House/Villa", "Plot/Land"].map((t) => {
+                  const isSelected = selectedPropertyTypes.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => togglePropertyType(t)}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {isSelected ? "✓ " : "+ "} {t}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <h4 className="font-bold text-gray-900 text-sm mb-3">Commercial</h4>
+              <div className="flex gap-2 flex-wrap mb-4">
+                {["Office Space", "Shop/Showroom", "Commercial Land"].map((t) => {
+                  const isSelected = selectedPropertyTypes.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => togglePropertyType(t)}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {isSelected ? "✓ " : "+ "} {t}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="pt-3 border-t flex justify-end">
+                <button onClick={() => setOpenDropdown(null)} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">Done</button>
+              </div>
             </div>
           )}
         </div>
 
         {/* BHK */}
         <div className="relative" data-filter-button>
-          <button onClick={() => setOpenDropdown((o) => (o === "bhk" ? null : "bhk"))} className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium" style={{ borderColor: THEME_BLUE }}>
-            BHK
+          <button
+            onClick={() => setOpenDropdown((o) => (o === "bhk" ? null : "bhk"))}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              selectedBHK.length > 0 ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span>
+              {selectedBHK.length === 0
+                ? "BHK"
+                : selectedBHK.length === 1
+                ? selectedBHK[0]
+                : `${selectedBHK[0]} +${selectedBHK.length - 1}`}
+            </span>
             <span className="text-sm">▾</span>
           </button>
           {openDropdown === "bhk" && (
-            <div className="absolute left-0 mt-3 w-[380px] bg-white rounded-lg shadow-lg border p-6 z-10">
-              <h4 className="font-semibold mb-3">BHK</h4>
-              <div className="flex gap-3 flex-wrap">{bhkOptions.map((b) => (
-                <button key={b} onClick={() => toggleBHK(b)} className={`px-3 py-1.5 rounded-full border text-sm ${selectedBHK.includes(b) ? "bg-blue-50 text-black border-blue-200" : "bg-white text-black border-black"}`} style={{ borderColor: THEME_BLUE }}>{selectedBHK.includes(b) ? "✓ " : "+ "} {b}</button>
-              ))}</div>
-              <div className="mt-6 text-right"><button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button></div>
+            <div className="absolute left-0 mt-3 w-80 bg-white rounded-xl shadow-xl border p-5 z-20">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-bold text-gray-900 text-sm">Bedrooms (BHK)</h4>
+                {selectedBHK.length > 0 && <button onClick={() => setSelectedBHK([])} className="text-xs text-red-500 font-medium">Clear</button>}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {bhkOptions.map((b) => {
+                  const isSelected = selectedBHK.includes(b);
+                  return (
+                    <button
+                      key={b}
+                      onClick={() => toggleBHK(b)}
+                      className={`px-3 py-2 rounded-lg border text-xs font-medium text-center transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {b}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 pt-3 border-t flex justify-end">
+                <button onClick={() => setOpenDropdown(null)} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">Done</button>
+              </div>
             </div>
           )}
         </div>
 
         {/* Posted By */}
         <div className="relative" data-filter-button>
-          <button onClick={() => setOpenDropdown((o) => (o === "postedBy" ? null : "postedBy"))} className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium" style={{ borderColor: THEME_BLUE }}>
-            Posted By
+          <button
+            onClick={() => setOpenDropdown((o) => (o === "postedBy" ? null : "postedBy"))}
+            className={`flex items-center gap-2 rounded-full px-4 py-2 border font-medium transition-all ${
+              selectedPostedBy.length > 0 ? "bg-blue-50 text-blue-700 border-blue-500 font-semibold" : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <span>
+              {selectedPostedBy.length === 0
+                ? "Posted By"
+                : selectedPostedBy.length === 1
+                ? selectedPostedBy[0]
+                : `${selectedPostedBy[0]} +${selectedPostedBy.length - 1}`}
+            </span>
             <span className="text-sm">▾</span>
           </button>
           {openDropdown === "postedBy" && (
-            <div className="absolute left-0 mt-3 w-[320px] bg-white rounded-lg shadow-lg border p-6 z-10">
-              <h4 className="font-semibold mb-3">Posted By</h4>
-              <div className="flex gap-3 flex-wrap">{postedByOptions.map((p) => (
-                <button key={p} onClick={() => togglePostedBy(p)} className={`px-3 py-1.5 rounded-full border text-sm ${selectedPostedBy.includes(p) ? "bg-blue-50 text-black border-blue-200" : "bg-white text-black border-black"}`} style={{ borderColor: THEME_BLUE }}>{selectedPostedBy.includes(p) ? "✓ " : "+ "} {p}</button>
-              ))}</div>
-              <div className="mt-6 text-right"><button onClick={() => setOpenDropdown(null)} className="text-sm text-gray-500">Done</button></div>
+            <div className="absolute left-0 mt-3 w-72 bg-white rounded-xl shadow-xl border p-5 z-20">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-bold text-gray-900 text-sm">Listed By</h4>
+                {selectedPostedBy.length > 0 && <button onClick={() => setSelectedPostedBy([])} className="text-xs text-red-500 font-medium">Clear</button>}
+              </div>
+              <div className="flex flex-col gap-2">
+                {postedByOptions.map((p) => {
+                  const isSelected = selectedPostedBy.includes(p);
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => togglePostedBy(p)}
+                      className={`px-3 py-2 rounded-lg border text-sm font-medium text-left transition-all ${
+                        isSelected
+                          ? "bg-blue-500 text-white border-blue-500 shadow-sm"
+                          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      }`}
+                    >
+                      {isSelected ? "✓ " : ""} {p}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 pt-3 border-t flex justify-end">
+                <button onClick={() => setOpenDropdown(null)} className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold">Done</button>
+              </div>
             </div>
           )}
         </div>
@@ -416,7 +697,7 @@ const Properties = () => {
         <div className="relative ml-auto">
           <button
             onClick={clearAll}
-            className="flex items-center gap-2 rounded-full px-4 py-2 border bg-white text-black font-medium hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="flex items-center gap-2 rounded-full px-4 py-2 border border-gray-300 bg-white text-gray-700 font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-all duration-200 cursor-pointer shadow-sm text-sm"
           >
             Clear Filters
           </button>
@@ -668,13 +949,15 @@ const Properties = () => {
                       <div className="flex flex-col justify-center items-center bg-gray-50 p-6 md:w-1/4 border-t md:border-t-0 md:border-l">
                         <p className="text-[#1E88E5] font-bold text-lg mb-4">₹ {formatRupee(property.price)}</p>
                         <div className="w-full space-y-3">
-                          <button onClick={(e) => { e.stopPropagation(); openModal("contact"); }} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-lg text-sm">
+                          <button onClick={(e) => { e.stopPropagation(); openModal("contact", property); }} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-full w-full flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg text-sm cursor-pointer font-bold">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
+                              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
                             </svg>
-                            Contact Owner
+                            Enquiry
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); openModal("getPhone"); }} className="border border-[#1E88E5] text-[#1E88E5] px-4 py-2 rounded-full w-full hover:bg-blue-50 text-sm">Get Phone No.</button>
+                          <button onClick={(e) => { e.stopPropagation(); openModal("getPhone", property); }} className="border-2 border-[#1E88E5] text-[#1E88E5] hover:bg-blue-50 px-4 py-2 rounded-full w-full text-sm font-semibold transition-all cursor-pointer">
+                            Get Phone No.
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -685,85 +968,152 @@ const Properties = () => {
           )}
         </div>
 
-        {/* Contact Modal */}
+        {/* Contact / Lead Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 backdrop-blur-sm bg-black/50" onClick={closeModal} />
-            <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-0 z-50 overflow-hidden">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 backdrop-blur-sm bg-black/60" onClick={closeModal} />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden z-50 animate-in fade-in zoom-in duration-200">
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-                    </svg>
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold">
+                      {modalFor === "getPhone" ? "Get Contact Details" : "Property Enquiry"}
+                    </h3>
                   </div>
-                  <h3 className="text-xl font-bold">Get Contact Details</h3>
+                  <button onClick={closeModal} className="text-white/80 hover:text-white text-xl">✕</button>
                 </div>
-                <p className="text-blue-100 text-sm">Enter your WhatsApp No. to get Contact Details of the Owner</p>
+                {selectedPropertyForModal && (
+                  <div className="bg-black/20 rounded-xl p-2.5 mt-2 text-xs">
+                    <p className="font-semibold truncate">🏢 {selectedPropertyForModal.title}</p>
+                    <p className="text-blue-200 truncate">📍 {selectedPropertyForModal.location} • ₹ {formatRupee(selectedPropertyForModal.price)}</p>
+                  </div>
+                )}
               </div>
 
-              {/* Form */}
-              <form onSubmit={submitModal} className="p-6 space-y-4">
-                <div>
-                  <input
-                    required
-                    value={modalForm.name}
-                    onChange={(e) => setModalForm((s) => ({ ...s, name: e.target.value }))}
-                    className="w-full border-b-2 border-gray-200 focus:border-blue-500 outline-none px-0 py-3 text-gray-800 placeholder-gray-500"
-                    placeholder="Your Name"
-                  />
-                </div>
-
-                <div>
-                  <input
-                    required
-                    type="email"
-                    value={modalForm.email}
-                    onChange={(e) => setModalForm((s) => ({ ...s, email: e.target.value }))}
-                    className="w-full border-b-2 border-gray-200 focus:border-blue-500 outline-none px-0 py-3 text-gray-800 placeholder-gray-500"
-                    placeholder="Email"
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="flex items-center gap-2 px-3 py-3 border-b-2 border-gray-200">
-                    <span className="text-gray-600 font-medium">IND</span>
-                    <span className="text-gray-800 font-medium">+91</span>
+              {/* Body: Form or Success Card */}
+              {modalSubmittedSuccess ? (
+                <div className="p-6 text-center space-y-4">
+                  <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+                    ✓
                   </div>
-                  <input
-                    required
-                    type="tel"
-                    value={modalForm.phone}
-                    onChange={(e) => setModalForm((s) => ({ ...s, phone: e.target.value }))}
-                    className="flex-1 border-b-2 border-gray-200 focus:border-blue-500 outline-none px-0 py-3 text-gray-800 placeholder-gray-500"
-                    placeholder="Your WhatsApp Number"
-                  />
-                </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900">Enquiry Submitted Successfully!</h4>
+                    <p className="text-xs text-gray-500 mt-1">Our representative & property desk have received your enquiry.</p>
+                  </div>
 
-                <div className="flex items-start gap-3 pt-4">
-                  <input type="checkbox" required className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
-                  <label className="text-sm text-gray-600 leading-relaxed">
-                    I Agree to <span className="text-blue-600 underline cursor-pointer">Edge Expert Terms of Use</span>
-                  </label>
-                </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left space-y-2">
+                    <div className="text-xs text-gray-500 font-medium">Direct Contact & WhatsApp:</div>
+                    <div className="text-base font-bold text-gray-900 flex items-center justify-between">
+                      <span>📞 {selectedPropertyForModal?.contactPhone || "+91 73853 27808"}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedPropertyForModal?.contactPhone || "+91 73853 27808");
+                          alert("Phone copied to clipboard!");
+                        }}
+                        className="text-xs text-blue-600 hover:underline font-semibold"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      📧 {selectedPropertyForModal?.contactEmail || "sales@edgeexpert.com"}
+                    </div>
+                  </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="flex-1 px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg"
-                  >
-                    Get Contact Details
-                  </button>
+                  <div className="flex gap-3 pt-2">
+                    <a
+                      href={`tel:${(selectedPropertyForModal?.contactPhone || "+91 73853 27808").replace(/\s+/g, '')}`}
+                      className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      Call Now
+                    </a>
+                    <a
+                      href={`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I am interested in ${selectedPropertyForModal?.title || 'this property'}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5"
+                    >
+                      WhatsApp
+                    </a>
+                    <button
+                      onClick={closeModal}
+                      className="px-4 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition"
+                    >
+                      Done
+                    </button>
+                  </div>
                 </div>
-              </form>
+              ) : (
+                <form onSubmit={submitModal} className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Your Full Name *</label>
+                    <input
+                      required
+                      value={modalForm.name}
+                      onChange={(e) => setModalForm((s) => ({ ...s, name: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                      placeholder="e.g. Rahul Sharma"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                    <input
+                      required
+                      type="email"
+                      value={modalForm.email}
+                      onChange={(e) => setModalForm((s) => ({ ...s, email: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                      placeholder="e.g. rahul@gmail.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">WhatsApp / Contact Number *</label>
+                    <div className="flex gap-2">
+                      <span className="px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700">+91</span>
+                      <input
+                        required
+                        type="tel"
+                        value={modalForm.phone}
+                        onChange={(e) => setModalForm((s) => ({ ...s, phone: e.target.value }))}
+                        className="flex-1 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400"
+                        placeholder="10-digit Mobile Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 pt-2">
+                    <input type="checkbox" required defaultChecked className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                    <label className="text-xs text-gray-600">
+                      I agree to receive property updates & verify contact details on WhatsApp/Phone.
+                    </label>
+                  </div>
+
+                  <div className="flex gap-3 pt-3">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submittingEnquiry}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {submittingEnquiry ? "Submitting..." : (modalFor === "getPhone" ? "Get Phone Number" : "Submit Enquiry")}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

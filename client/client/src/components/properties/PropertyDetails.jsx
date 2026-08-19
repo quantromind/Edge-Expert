@@ -746,42 +746,68 @@ const PropertyDetails = () => {
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-                    {property.agent.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                    {property.agent?.name
+                      ? property.agent.name
+                          .split(" ")
+                          .filter(Boolean)
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2)
+                      : "EE"}
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 text-xl mb-1">
-                      {property.agent.name}
+                      {property.agent?.name || "Property Consultant"}
                     </h4>
                     <p className="text-gray-600 text-sm mb-2">
-                      {property.agent.specialTag}
+                      {property.agent?.specialTag || "Verified Partner"}
                     </p>
                     <div className="flex items-center gap-1">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           className={`w-4 h-4 ${
-                            i < Math.floor(property.agent.rating)
+                            i < Math.floor(property.agent?.rating || 4.5)
                               ? "text-yellow-400 fill-current"
                               : "text-gray-300"
                           }`}
                         />
                       ))}
                       <span className="text-sm text-gray-600 ml-2">
-                        ({property.agent.reviews} reviews)
+                        ({property.agent?.reviews || 25} reviews)
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <button className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3">
+                  <button 
+                    onClick={() => {
+                      const phone = property.agent?.phone || "+91 73853 27808";
+                      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                      if (isMobile) {
+                        window.open(`tel:${phone.replace(/\s+/g, '')}`);
+                      } else {
+                        navigator.clipboard.writeText(phone);
+                        alert(`Phone number ${phone} copied to clipboard!`);
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 cursor-pointer"
+                  >
                     <Phone className="w-5 h-5" />
-                    Call {property.agent.phone}
+                    {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                      ? `Call ${property.agent?.phone || "+91 73853 27808"}`
+                      : `Copy ${property.agent?.phone || "+91 73853 27808"}`}
                   </button>
-                  <button className="w-full border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                  <button 
+                    onClick={() => {
+                      const email = property.agent?.email || "sales@edgeexpert.com";
+                      const name = property.agent?.name || "Agent";
+                      window.open(`mailto:${email}?subject=${encodeURIComponent(`Inquiry about ${property.title}`)}&body=${encodeURIComponent(`Hello ${name},\n\nI am interested in ${property.title}.\n\nBest regards`)}`);
+                    }}
+                    className="w-full border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3"
+                  >
                     <Mail className="w-5 h-5" />
                     Email Agent
                   </button>

@@ -194,47 +194,99 @@ function App() {
 
           {/* ✅ Application Routes */}
           <Routes>
-            {/* Public Routes */}
+            {/* Core & Public Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/loginregister" element={<LoginRegister />} />
             <Route path="/contact" element={<Contactus />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/property/:id" element={<PropertyDetails />} />
+            <Route path="/contactus" element={<Contactus />} />
             <Route path="/aboutus" element={<AboutUs />} />
+            <Route path="/about" element={<AboutUs />} />
             <Route path="/payrent" element={<PayRent />} />
             <Route path="/services" element={<Servicess />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/blogs" element={<Blog />} />
             <Route path="/blog/:title" element={<BlogDetails />} />
             <Route path="/enquiry" element={<EnquiryForm />} />
 
-            {/* Packages */}
-            <Route path="/developer" element={<Developer />} />
-            <Route path="/broker" element={<BrokerPage />} />
-            <Route path="/owner" element={<OwnerPage />} />
-            <Route path="/primium" element={<PremiumPlans />} />
-         
-
-            {/* Housekeeping */}
-            <Route path="/housekeeping" element={<HouseKeeping />} />
-            <Route path="/housekeeping/:id" element={<HouseKeepingDetails />} />
-
-            {/* All About Us */}
-            <Route path="/companyoverview" element={<CompanyOverview />} />
-            <Route path="/sustainability" element={<Sustainability />} />
-            <Route path="/corporategovernance" element={<CorporateGovernance />} />
-            <Route path="/career" element={<Career />} />
-            <Route path="/apply" element={<ApplyNow/>} />
-             <Route path="/events" element={<Events />} />
-
-            {/* // component wrapper for SEO */}
-            <Route path="/componentwrapper/:route" element={<ComponentWrapper />} />
+            {/* Properties Core Routes & Aliases */}
+            <Route path="/properties" element={<Properties />} />
+            <Route path="/buyproperties" element={<Properties />} />
+            <Route path="/buy" element={<Properties />} />
+            <Route path="/property/:id" element={<PropertyDetails />} />
+            <Route path="/properties/:id" element={<PropertyDetails />} />
+            <Route path="/propertydetails" element={<Properties />} />
 
             {/* Buy Residential */}
             <Route path="/buyresidential" element={<Buyresidential />} />
             <Route path="/buyresidential/:id" element={<ViewDetailsBuyResidential />} />
 
+            {/* Rent & Sell Properties */}
+            <Route path="/rentproperties" element={<RentProperties />} />
+            <Route path="/rentproperty" element={<RentProperty />} />
+            <Route path="/rent" element={<RentProperties />} />
+            <Route path="/sellproperties" element={<SellProperties />} />
+            <Route path="/sell" element={<SellProperties />} />
+
+            {/* Explore Properties: Projects & Estates */}
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/newprojects" element={<Projects />} />
+            <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/project-details/:id" element={<ProjectDetails />} />
+
+            {/* Commercial */}
+            <Route path="/commercial" element={<BuyCommercial />} />
+            <Route path="/commercial/:id" element={<CommercialDetails />} />
+
+            {/* Luxury, Affordable & PG */}
+            <Route path="/luxuryproperties" element={<LuxuryProperties />} />
+            <Route path="/luxuryproperties/:id" element={<LuxuryPropertiesDetails />} />
+            <Route path="/featuredproperties" element={<FeaturedProperties />} />
+            <Route path="/affordable" element={<AffordableHousing />} />
+            <Route path="/affordable/:id" element={<AffordableDetail />} />
+            <Route path="/pgcoliving" element={<PGColiving />} />
+
+            {/* Housekeeping, Interior & Moving Services */}
+            <Route path="/housekeeping" element={<HouseKeeping />} />
+            <Route path="/housekeeping/:id" element={<HouseKeepingDetails />} />
+            <Route path="/packersmovers" element={<PackersMoversDetails />} />
+            <Route path="/packers-movers" element={<PackersMoversDetails />} />
+            <Route path="/interiordesign" element={<InteriorDesign />} />
+            <Route path="/interior-design" element={<InteriorDesign />} />
+            <Route path="/packages" element={<PackagesSection />} />
+            <Route path="/services/painting" element={<PaintingDetails />} />
+            <Route path="/services/renovation" element={<RenovationDetails />} />
+            <Route path="/services/panelling" element={<PanellingDetails />} />
+            <Route path="/services/packersmovers" element={<PackersMoversDetails />} />
+
+            {/* Membership Packages & Pricing */}
+            <Route path="/developer" element={<Developer />} />
+            <Route path="/broker" element={<BrokerPage />} />
+            <Route path="/owner" element={<OwnerPage />} />
+            <Route path="/primium" element={<PremiumPlans />} />
+            <Route path="/premiumplans" element={<PremiumPlans />} />
+            <Route path="/premium" element={<PremiumPlans />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/benefitsmembers" element={<BenefitsMember />} />
+
+            {/* About Us & Corporate Pages */}
+            <Route path="/companyoverview" element={<CompanyOverview />} />
+            <Route path="/sustainability" element={<Sustainability />} />
+            <Route path="/corporategovernance" element={<CorporateGovernance />} />
+            <Route path="/career" element={<Career />} />
+            <Route path="/apply" element={<ApplyNow />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/investorrelations" element={<InvestorRelations />} />
+
+            {/* Legal & Policies */}
+            <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/termsconditions" element={<TermsConditions />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/terms" element={<TermsConditions />} />
+
+            {/* Dashboards & Protected Routes */}
             <Route
               path="/brokerpanel/*"
               element={
@@ -243,20 +295,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
-            
-
             <Route
               path="/customerdashboard"
               element={
                 <ProtectedRoute role="customer">
                   <CustomerDashboard />
-                  
                 </ProtectedRoute>
               }
             />
-
-            {/* Admin Dashboard panel */}
+            <Route
+              path="/customerpanel"
+              element={
+                <ProtectedRoute role="customer">
+                  <CustomerDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/dashboard"
               element={
@@ -265,61 +319,21 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-          {/* developerpanel routes */}
+            <Route
+              path="/adminpanel/*"
+              element={
+                <ProtectedRoute role="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/developerpanel/*" element={<DeveloperDashboard />} />
             <Route path="/developer/bookings" element={<Bookings />} />
 
+            {/* SEO Component Wrapper */}
+            <Route path="/componentwrapper/:route" element={<ComponentWrapper />} />
 
-            
-            
-
-            {/* Explore Properties */}
-            <Route path="/featuredproperties" element={<FeaturedProperties />} />
-            <Route path="/rentproperty" element={<RentProperty />} />
-            <Route path="/luxuryproperties" element={<LuxuryProperties />} />
-            <Route path="/luxuryproperties/:id" element={<LuxuryPropertiesDetails />} />
-            <Route path="/pgcoliving" element={<PGColiving />} />
-            <Route path="/sellproperties" element={<SellProperties />} />
-            <Route path="/rentproperties" element={<RentProperties />} />
-            <Route path="/affordable" element={<AffordableHousing />} />
-            <Route path="/affordable/:id" element={<AffordableDetail />} />
-            <Route path="/commercial" element={<BuyCommercial />} />
-            <Route path="/commercial/:id" element={<CommercialDetails />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<ProjectDetails />} />
-            <Route path="/project-details/:id" element={<ViewDetailsBuyResidential />} />    //Utkarsh_Kadu          
-            <Route path="/projects/:id" element={<ProjectDetails />} />
-            
-
-            {/* services for housekeeping / interir design */}
-            <Route path="/housekeeping" element={<HouseKeeping />} />
-            <Route path="/housekeeping/:id" element={<HouseKeepingDetails />} />
-            <Route path="/packersmovers" element={<PackersMoversDetails />} />
-            
-            <Route path="/interiordesign" element={<InteriorDesign />} />
-            <Route path="/packages" element={<PackagesSection />} />
-
-            <Route path="/packersmovers" element={<PackersMoversDetails />} />
-           <Route path="/services/painting" element={<PaintingDetails />} />
-           <Route path="/services/renovation" element={<RenovationDetails />} />
-           <Route path="/services/panelling" element={<PanellingDetails />} />
-
-    
-             {/* privacy policy */}
-          
-            <Route path="/privacypolicy" element={<PrivacyPolicy />}/>
-            <Route path="/termsconditions" element={<TermsConditions/>}/>
-            <Route path="/investorrelations" element={<InvestorRelations/>}/>
-
-
-
-            {/* benifitmember */}
-            <Route path="/benefitsmembers" element={<BenefitsMember/>}/>
-                <Route path="/pricing" element={<Pricing/>}/>
-            
-
-            {/* 404 Page */}
+            {/* 404 Not Found */}
             <Route path="*" element={<NotFound />} />
           </Routes>
 

@@ -10,398 +10,14 @@ import {
   Twitter,
   Linkedin,
   Home,
-  Plus, // 👈 New import for the slider animation
 } from "lucide-react";
 
 
 // ========================================
-// 1. PROPERTY DATA
-// ========================================
-const PROPERTY_DATA = [
-  {
-    id: 1,
-    image:
-      "https://i.pinimg.com/1200x/b9/b2/1f/b9b21f27dd6bc357c2143713b9b0093b.jpg",
-    type: "Oceanfront Estate",
-    address: "The Azure Estate",
-    subtitle: "Architectural design with stunning infinity pool",
-    specs: [
-      { label: "Beds", value: "2" },
-      { label: "Baths", value: "2" },
-      { label: "Area", value: "1,500 SqFt" },
-      { label: "Price", value: "₹ 5 Cr" },
-    ],
-    badges: ["Infinity Pool", "Gated Access", "Smart Home"],
-  },
-  {
-    id: 2,
-    image:
-      "https://i.pinimg.com/1200x/14/e9/58/14e9589228777056baf1d4a72ca1cb3e.jpg",
-    type: "Suburban Haven",
-    address: "Willow Creek Manor",
-    subtitle: "Warm traditional home with large family garden",
-    specs: [
-      { label: "Beds", value: "4" },
-      { label: "Baths", value: "3" },
-      { label: "Area", value: "3,500 SqFt" },
-      { label: "Price", value: "₹ 7.4 Cr" },
-    ],
-    badges: ["Quiet Street", "Top School District", "Two-Car Garage"],
-  },
-  {
-    id: 3,
-    image:
-      "https://i.pinimg.com/1200x/42/a8/bb/42a8bb16d1babbdfc7491adb51dcef38.jpg",
-    type: "Sky Tower Residence",
-    address: "Skyline Apex Loft",
-    subtitle: "Sleek Urban Loft with Panoramic Cityscape",
-    specs: [
-      { label: "Beds", value: "1" },
-      { label: "Baths", value: "1" },
-      { label: "Area", value: "950 SqFt" },
-      { label: "Price", value: "₹ 75 Lakh" },
-    ],
-    badges: ["Concierge", "City View", "Private Balcony"],
-  },
-  {
-    id: 4,
-    image:
-      "https://i.pinimg.com/1200x/99/51/43/99514316becb49ed7b2ea57724c17536.jpg",
-    type: "Alpine Chalet",
-    address: "Whisperwind Lodge",
-    subtitle: "Secluded Log Cabin by the forest edge",
-    specs: [
-      { label: "Beds", value: "3" },
-      { label: "Baths", value: "2" },
-      { label: "Area", value: "2,100 SqFt" },
-      { label: "Price", value: "₹ 5.2 Cr" },
-    ],
-    badges: ["Secluded", "Forest Views", "Fireplace"],
-  },
-];
-
-// ========================================
-// 2. SLIDE COMPONENT
-// ========================================
-const Slide = ({ property, index, isActive, setActiveIndex }) => {
-  const { image, type, address, subtitle, specs, badges } = property;
-
-  const slideClass = isActive
-    ? "flex-[2] md:flex-[2.5]"
-    : "flex-[0.6] md:flex-1 grayscale hover:filter-none";
-
-  const numberPosition = isActive
-    ? "top-2 left-2 text-lg sm:text-2xl md:text-4xl"
-    : "top-2 left-2 text-xl sm:text-5xl md:text-7xl";
-
-  const handleClick = () => {
-    setActiveIndex(isActive ? -1 : index);
-  };
-
-  return (
-    <div
-      className={`relative h-full bg-cover bg-center transition-all duration-700 ease-in-out cursor-pointer overflow-hidden ${slideClass}`}
-      style={{ backgroundImage: `url('${image}')` }}
-      onClick={handleClick}
-    >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-
-      <div
-        className={`absolute font-light text-white/70 z-30 transition-all duration-700 ${numberPosition}`}
-      >
-        {String(index + 1).padStart(2, "0")}
-      </div>
-
-      <div
-        className={`absolute bottom-24 left-2 text-[10px] sm:text-sm text-white/70 transition-all duration-700 ${
-          isActive ? "opacity-0" : "rotate-[-90deg] opacity-100"
-        }`}
-      >
-        {type}
-      </div>
-
-      <div
-        className={`absolute bottom-4 right-4 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-green-400 flex items-center justify-center z-30 transition-all ${
-          isActive
-            ? "bg-green-400/20 hover:bg-green-400/30"
-            : "hover:bg-green-400/20"
-        }`}
-      >
-        <Plus
-          className={`w-4 h-4 text-green-400 absolute transition-all ${
-            isActive ? "opacity-0 scale-0 rotate-180" : "opacity-100 rotate-0"
-          }`}
-        />
-        <div
-          className={`absolute w-4 h-[2px] bg-green-400 transition-all ${
-            isActive ? "opacity-100 scale-100" : "opacity-0 scale-0"
-          }`}
-        />
-      </div>
-
-      <div
-        className={`absolute left-4 right-4 bottom-6 sm:bottom-10 md:bottom-20 text-white z-20 transition-all duration-700 ${
-          isActive ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <p className="text-xs sm:text-sm font-light mb-1">{type}</p>
-
-        <h2 className="text-2xl sm:text-3xl md:text-5xl font-light mb-1">
-          {address}
-        </h2>
-
-        <p className="text-xs sm:text-sm text-white/80 mb-4">{subtitle}</p>
-
-        <div className="grid grid-cols-2 gap-x-3 gap-y-1 border-t border-b border-white/20 py-3 text-xs sm:text-sm md:text-lg">
-          {specs.map((spec, i) => (
-            <div key={i} className="flex justify-between">
-              <span className="text-white/70">{spec.label}</span>
-              <span className="text-white">{spec.value}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2 mt-3">
-          {badges.map((badge, i) => (
-            <div
-              key={i}
-              className="px-2 py-1 bg-white/10 text-green-300 text-xs rounded-full"
-            >
-              • {badge}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ========================================
-// 3. MAIN SLIDER
-// ========================================
-const AccordionSlider = () => {
-  const [activeIndex, setActiveIndex] = useState(-1);
-
-  return (
-    <div
-      className="
-      w-full max-w-full sm:max-w-3xl md:max-w-5xl lg:max-w-6xl
-      h-[55vh] sm:h-[65vh] md:h-[75vh]    /* ✅ Reduced height for better fit */
-      relative overflow-hidden shadow-xl
-    "
-    >
-      <div className="flex h-full">
-        {PROPERTY_DATA.map((property, index) => (
-          <Slide
-            key={property.id}
-            property={property}
-            index={index}
-            isActive={activeIndex === index}
-            setActiveIndex={setActiveIndex}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ========================================
-// 4. WRAPPER COMPONENT (FINAL PERFECTED)
-// ========================================
-const NavigateNextContent = () => {
-  const navigate = useNavigate();
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, duration: 0.5 },
-    },
-  };
-
-  const fadeInLeft = {
-    hidden: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.7 } },
-  };
-
-  const fadeInRight = {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.7 } },
-  };
-
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7 } },
-  };
-
-  return (
-    <motion.div
-      className="w-full flex flex-col items-center justify-start overflow-hidden bg-gray-50"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      {/* TOP SECTION */}
-          <motion.div
-            className="relative w-full flex flex-col items-center justify-center py-16 px-6 shadow-xl overflow-hidden"
-            variants={fadeInUp}
-          >
-            {/* --- BACKGROUND IMAGE (Geometric Grid) --- */}
-            <div
-              className="absolute inset-0 bg-cover bg-center scale-110 opacity-70" 
-              style={{
-                backgroundImage:
-                  "url('https://img.freepik.com/free-vector/abstract-geometric-wireframe-background_52683-59421.jpg')",
-                backgroundAttachment: "fixed",
-              }}
-            ></div>
-
-            {/* DARK RICH OVERLAY (Reduced opacity for brighter look) */}
-            <div className="absolute inset-0 bg-black/30"></div>
-
-            {/* CONTENT ABOVE BACKGROUND */}
-            <div className="relative z-10 w-full flex flex-col items-center">
-              {/* Top title */}
-              <motion.h1
-                className="text-4xl sm:text-5xl font-sans font-extralight text-white tracking-wider 
-                pb-2 mb-8 sm:mb-12 self-start ml-6 sm:ml-10" 
-                variants={fadeInLeft}
-              >
-                ACCESS EXCLUSIVE SERVICES
-              </motion.h1>
-
-              {/* LEFT BUTTONS | RIGHT DISCOUNT TEXT */}
-              <div className="w-full max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-10 px-4 sm:px-10">
-                {/* LEFT SIDE BUTTONS (Electric Blue Hover) */}
-                <motion.div
-                  className="flex flex-col items-start justify-start gap-6"
-                  variants={fadeInLeft}
-                >
-
-
-
-  {/* Direct Builder Projects */}
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.97 }}
-    onClick={() => navigate("/projects")}
-    className="px-8 py-3 
-               bg-white/20 
-               backdrop-blur-xl 
-               border border-white/30
-               text-white 
-               font-bold uppercase tracking-wide 
-               rounded-xl shadow-xl 
-               hover:bg-white/30 
-               transition-all duration-300 cursor-pointer"
-  >
-    🏢 Direct Builder Projects
-  </motion.button>
-
-  {/* Builder Consultation */}
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.97 }}
-    onClick={() => navigate("/enquiry")}
-    className="px-8 py-3 
-               bg-white/20 
-               backdrop-blur-xl 
-               border border-white/30
-               text-white 
-               font-bold uppercase tracking-wide 
-               rounded-xl shadow-xl 
-               hover:bg-white/30 
-               transition-all duration-300 cursor-pointer"
-  >
-    🤝 Builder Consultation
-  </motion.button>
-
-</motion.div>
-
-           {/* RIGHT SIDE DISCOUNT TEXT (Prominent Black-Gray Text) */}
-                <motion.div
-                  className="flex flex-col items-center justify-center text-center p-4 sm:p-0"
-                  variants={fadeInRight}
-                >
-                  <p className="text-white/80 text-sm uppercase tracking-widest mb-1">
-                    Exclusive Offer
-                  </p>
-                  <p 
-                    // White text with subtle black-gray shadow/glow
-                    className="text-white text-6xl sm:text-7xl font-extrabold tracking-tight font-mono mb-2 promo-text"
-                  >
-                    70% OFF 
-                  </p>
-                  <p 
-                    className="text-white font-semibold text-base sm:text-xl"
-                    style={{ textShadow: '0 0 5px rgba(255,255,255,0.4)' }}
-                  >
-                    Your First Service Booking
-                  </p>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-
-      {/* ACCORDION SLIDER */}
-      <motion.div className="w-full">
-        <AccordionSlider />
-      </motion.div>
-    </motion.div>
-  );
-};
-
-
-
-
-
-
-// ========================================
-// 4. MENU DATA
+// MENU DATA
 // ========================================
 const menuData = [
-  {
-    title: "Navigate your next",
-    subItems: [
-      "Buy Properties",
-      "Rent Properties",
-      "Buy Commercial Properties",
-      "Sell Properties",
-      "Luxury Apartments",
-    ],
-  },
-  { title: "Signup/Login", subItems: ["Owner Signup", "Broker Signup", "Developer Signup", "Owner Login", "Broker Login", "Developer Login"] },
-  // { title: "Login", subItems: ["Owner Login", "Broker Login", "Developer Login"] },
-  {
-    title: "Get Memberships",
-    subItems: [
-      "Owner Membership",
-      "Broker Membership",
-      "Developer Membership",
-      "Benefits for Members",
-      "Pricing & Plans",
-      "Premium",
-    ],
-  },
-  {
-    title: "Explore Properties",
-    subItems: [
-      "Buy Properties",
-      "Rent Properties",
-      "Buy Commercial spaces",
-      "New Projects",
-      "Luxury Apartments",
-      "Affordable Housing",
-      "Featured Properties",
-      "PG/Co-living",
-      "Sell Properties",
-    ],
-  },
-  { 
-    title: "Featured Developers", 
-    subItems: ["Godrej Properties (Mumbai)", "JP Infra", "Sonam Group", "Mahindra Lifespaces"] 
-  },
-  { title: "Our Services", subItems: ["Direct Builder Projects", "Buy Properties", "Rent Properties", "Commercial Spaces", "Luxury Estates", "Builder Consultation", "Pay Rent"] },
+  { title: "Admin Login", subItems: [], link: "/login" },
   {
     title: "About Us",
     subItems: ["Company Overview", "Sustainability", "Corporate Governance", "Contact Us", "aboutus", "blog", "Career", "Events"],
@@ -438,12 +54,8 @@ const MegaSidebar = ({ isOpen, onClose }) => {
       "JP Infra": "https://www.jpinfra.com/",
       "Sonam Group": "https://sonamgroup.com/",
       "Mahindra Lifespaces": "https://www.mahindralifespaces.com/",
-      "Owner Signup": "/loginregister",
-      "Broker Signup": "/loginregister",
-      "Developer Signup": "/loginregister",
-      "Owner Login": "/loginregister",
-      "Broker Login": "/loginregister",
-      "Developer Login": "/loginregister",
+      "Admin Login": "/login",
+      "Admin Dashboard": "/admin/dashboard",
       "Owner Membership": "/owner",
       "Broker Membership": "/broker",
       "Developer Membership": "/developer",
@@ -665,44 +277,35 @@ const MegaSidebar = ({ isOpen, onClose }) => {
                                   : "w-full h-full overflow-y-auto"
                               }
                             >
-                              {!isMobile && item.title !== "Navigate your next" && (
+                              {!isMobile && (
                                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 p-8 pb-4">
                                   {item.title}
                                 </h2>
                               )}
 
-                              {/* NEW: ACCORDION SLIDER (for 'Navigate your next') */}
-                              {item.title === "Navigate your next" ? (
-                                <NavigateNextContent 
-                                    onClose={onClose} 
-                                    handleRedirect={handleRedirect} 
-                                />
-                              ) : (
-                                // NORMAL SUBMENU LAYOUT
-                                <div className="grid sm:grid-cols-3 gap-y-2 sm:gap-y-4 px-4 sm:px-8 py-4 sm:py-0">
-                                  {getColumns(item.subItems).map((col, i) => (
-                                    <div key={i} className="flex flex-col gap-8">
-                                      {col.map((sub, j) => (
-                                        <a
-                                          key={j}
-                                          href="#"
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            handleRedirect(sub);
-                                          }}
-                                          className="group py-3 px-4 text-gray-700 text-base hover:text-blue-600 hover:bg-gray-50 rounded flex items-center justify-between transition-all border-b border-gray-200 last:border-b-0" // ✅ ADDED BORDER FOR LINE BELOW ITEM
-                                        >
-                                          {sub}
-                                          <ArrowRight
-                                            size={14}
-                                            className="text-blue-500 group-hover:text-blue-600"
-                                          />
-                                        </a>
-                                      ))}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              <div className="grid sm:grid-cols-3 gap-y-2 sm:gap-y-4 px-4 sm:px-8 py-4 sm:py-0">
+                                {getColumns(item.subItems).map((col, i) => (
+                                  <div key={i} className="flex flex-col gap-8">
+                                    {col.map((sub, j) => (
+                                      <a
+                                        key={j}
+                                        href="#"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          handleRedirect(sub);
+                                        }}
+                                        className="group py-3 px-4 text-gray-700 text-base hover:text-blue-600 hover:bg-gray-50 rounded flex items-center justify-between transition-all border-b border-gray-200 last:border-b-0"
+                                      >
+                                        {sub}
+                                        <ArrowRight
+                                          size={14}
+                                          className="text-blue-500 group-hover:text-blue-600"
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </motion.div>
                         )}
