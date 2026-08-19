@@ -291,7 +291,13 @@ const Footer = () => {
               <div>
                 <h2 className="text-lg font-bold mb-3 text-white">Follow Us</h2>
                 <div className="flex space-x-4 mb-4">
-                  <a href="#" className="hover:text-teal-400 transition-colors">
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61592347450730"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-teal-400 transition-colors"
+                    aria-label="Facebook"
+                  >
                     <Facebook size={22} />
                   </a>
 
@@ -312,10 +318,16 @@ const Footer = () => {
                     </svg>
                   </a>
 
-                  <a href="#" className="hover:text-teal-400 transition-colors">
+                  <a
+                    href="https://www.instagram.com/edge.expertrealty/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-teal-400 transition-colors"
+                    aria-label="Instagram"
+                  >
                     <Instagram size={22} />
                   </a>
-                  <a href="#" className="hover:text-teal-400 transition-colors">
+                  <a href="#" className="hover:text-teal-400 transition-colors" aria-label="LinkedIn">
                     <Linkedin size={22} />
                   </a>
                 </div>

@@ -89,6 +89,8 @@ function Navbar() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const searchPopupRef = useRef(null);
@@ -143,11 +145,35 @@ function Navbar() {
     setSearchTerm("");
   };
 
+  // ✅ Scroll direction detection (Hide on scroll down, show on scroll up)
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      setIsScrolled(currentScrollY > SCROLL_THRESHOLD);
+
+      if (currentScrollY <= 10) {
+        // At top: always show
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 70) {
+        // Scrolling down: hide navbar & close open popups
+        setIsVisible(false);
+        setShowSearchPopup(false);
+        setPropertyDropdownOpen(false);
+        setServicesDropdownOpen(false);
+      } else if (currentScrollY < lastScrollY.current) {
+        // Scrolling up: show navbar
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
     const handleResize = () => setIsMobileView(window.innerWidth < 1024);
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
@@ -204,13 +230,12 @@ function Navbar() {
     "/career",
     "/apply",
     "/events",
-
   ];
 
   const isOverDarkHero =
     !isScrolled && darkBackgroundPaths.includes(location.pathname);
 
-  const iconColor = "black";
+  const iconColor = isOverDarkHero ? "white" : "black";
 
   const UtilityButton = ({
     icon: Icon,
@@ -219,15 +244,15 @@ function Navbar() {
     active = false,
     sizeClass = "w-10 h-10",
   }) => {
-    const finalIconColor = active ? "black" : iconColor;
+    const finalIconColor = active ? (isOverDarkHero ? "white" : "black") : iconColor;
     return (
       <button
         onClick={onClick}
         title={label}
         className={`flex items-center justify-center ${sizeClass} rounded-full transition-all ${
           active
-            ? "bg-gray-100 dark:bg-gray-700"
-            : "hover:scale-110 duration-300"
+            ? isOverDarkHero ? "bg-white/20" : "bg-gray-100 dark:bg-gray-700"
+            : isOverDarkHero ? "hover:bg-white/10 hover:scale-110 duration-300" : "hover:scale-110 duration-300"
         }`}
       >
         <Icon color={finalIconColor} size={22} />
@@ -242,12 +267,10 @@ function Navbar() {
     const underline = isOverDarkHero
       ? "after:bg-blue-300"
       : "after:bg-blue-600";
-    // --- CHANGE HERE: Conditionally set text color ---
     const textColor = isOverDarkHero ? "text-white" : "text-black";
     return (
       <button
         onClick={() => navigate(to)}
-        // --- CHANGE HERE: Replaced 'text-white' with the dynamic textColor variable ---
         className={`relative flex items-center gap-2 px-3 py-1 font-medium text-sm xl:text-lg transition-all group cursor-pointer ${hoverColor} ${textColor}`}
       >
         <span
@@ -262,8 +285,12 @@ function Navbar() {
   return (
     <>
       <nav
-        className={`flex items-center justify-between px-6 sm:px-10 h-20 fixed top-0 w-full z-50 transition-all ${
-          isScrolled ? "border-gray-200" : "bg-transparent" // Removed text-white from here as it was conflicting
+        className={`flex items-center justify-between px-6 sm:px-10 h-20 fixed top-0 w-full z-50 transition-all duration-300 ease-in-out ${
+          isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+        } ${
+          isScrolled
+            ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md border-b border-gray-200/60 dark:border-gray-800"
+            : "bg-transparent"
         }`}
       >
         {/* Logo */}
@@ -275,11 +302,7 @@ function Navbar() {
         </div>
 
         {/* Desktop Menu */}
-        <div
-          className={`hidden lg:flex items-center space-x-2 font-semibold relative transition-all duration-300 ${
-            isScrolled ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-        >
+        <div className="hidden lg:flex items-center space-x-2 font-semibold relative">
           <MenuItem to="/" icon={Home} label="Home" />
 
           {/* Properties & Top Projects Dropdown */}
@@ -497,7 +520,11 @@ function Navbar() {
           </button>
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="hidden lg:flex items-center justify-center w-10 h-10 bg-white cursor-pointer rounded-full"
+            className={`hidden lg:flex items-center justify-center w-10 h-10 cursor-pointer rounded-full transition-all duration-200 ${
+              isOverDarkHero
+                ? "bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20"
+                : "bg-white shadow-sm hover:shadow border border-gray-200"
+            }`}
           >
             <HamburgerIcon size={24} color={iconColor} />
           </button>

@@ -727,34 +727,46 @@ const MegaSidebar = ({ isOpen, onClose }) => {
               {/* Social Icons */}
               <div className="mt-8 border-t border-gray-300 pt-6 pb-8">
                 <div className="flex space-x-4 mb-4">
-                                  <a href="#" className="hover:text-teal-400 transition-colors">
-                                    <Facebook size={22} />
-                                  </a>
-                
-                                  {/* X (Twitter) icon */}
-                                  <a
-                                    href="#"
-                                    className="hover:text-teal-400 transition-colors"
-                                    aria-label="X (Twitter)"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="22"
-                                      height="22"
-                                      viewBox="0 0 24 24"
-                                      fill="currentColor"
-                                    >
-                                      <path d="M18.244 2H21.5l-7.57 8.66L22 22h-6.51l-5.1-6.32L4.6 22H1.333l8.09-9.26L2 2h6.64l4.66 5.79L18.244 2zm-1.1 18h1.82L8.15 4h-1.9l10.89 16z" />
-                                    </svg>
-                                  </a>
-                
-                                  <a href="#" className="hover:text-teal-400 transition-colors">
-                                    <Instagram size={22} />
-                                  </a>
-                                  <a href="#" className="hover:text-teal-400 transition-colors">
-                                    <Linkedin size={22} />
-                                  </a>
-                                </div>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61592347450730"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-teal-400 transition-colors"
+                    aria-label="Facebook"
+                  >
+                    <Facebook size={22} />
+                  </a>
+
+                  {/* X (Twitter) icon */}
+                  <a
+                    href="#"
+                    className="hover:text-teal-400 transition-colors"
+                    aria-label="X (Twitter)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M18.244 2H21.5l-7.57 8.66L22 22h-6.51l-5.1-6.32L4.6 22H1.333l8.09-9.26L2 2h6.64l4.66 5.79L18.244 2zm-1.1 18h1.82L8.15 4h-1.9l10.89 16z" />
+                    </svg>
+                  </a>
+
+                  <a
+                    href="https://www.instagram.com/edge.expertrealty/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-teal-400 transition-colors"
+                    aria-label="Instagram"
+                  >
+                    <Instagram size={22} />
+                  </a>
+                  <a href="#" className="hover:text-teal-400 transition-colors" aria-label="LinkedIn">
+                    <Linkedin size={22} />
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>

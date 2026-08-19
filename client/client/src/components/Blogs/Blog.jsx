@@ -349,7 +349,10 @@ export default function Blog() {
             </motion.p>
             <div className="flex space-x-4 mt-6">
               <motion.a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61592347450730"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
                 className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
                 whileHover={{ scale: 1.2, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
@@ -358,6 +361,7 @@ export default function Blog() {
               </motion.a>
               <motion.a
                 href="#"
+                aria-label="Twitter"
                 className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
                 whileHover={{ scale: 1.2, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
@@ -365,7 +369,10 @@ export default function Blog() {
                 <Twitter size={24} />
               </motion.a>
               <motion.a
-                href="#"
+                href="https://www.instagram.com/edge.expertrealty/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
                 whileHover={{ scale: 1.2, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
@@ -374,6 +381,7 @@ export default function Blog() {
               </motion.a>
               <motion.a
                 href="#"
+                aria-label="LinkedIn"
                 className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
                 whileHover={{ scale: 1.2, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}

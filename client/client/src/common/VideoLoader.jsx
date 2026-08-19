@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import loadingVideo from "../assets/video/loadingpage.mp4";
 
 export default function VideoLoader({ onComplete }) {
   const [showLoader, setShowLoader] = useState(true);
-  const [progress, setProgress] = useState(5);
+  const [progress, setProgress] = useState(10);
   const canvasRef = useRef(null);
   const videoRef = useRef(null);
   const animFrameId = useRef(null);
@@ -17,21 +17,32 @@ export default function VideoLoader({ onComplete }) {
     }
   };
 
-  // Screen-wide user gesture listener for instant sound enablement if browser policy blocked unmuted initial autoplay
+  // Immediate Audio Unlock function (Browser Autoplay compliance)
+  const unlockAudio = () => {
+    const vid = videoRef.current;
+    if (vid) {
+      vid.muted = false;
+      vid.volume = 1.0;
+      const playPromise = vid.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  };
+
+  // Screen-wide gesture listener for instant sound enablement if browser restricted initial unmuted autoplay
   useEffect(() => {
     const handleGesture = () => {
       const vid = videoRef.current;
-      if (vid) {
-        vid.muted = false;
-        vid.volume = 1.0;
-        vid.play().catch(() => {});
+      if (vid && vid.muted) {
+        unlockAudio();
       }
     };
 
-    window.addEventListener("click", handleGesture);
-    window.addEventListener("pointerdown", handleGesture);
-    window.addEventListener("touchstart", handleGesture);
-    window.addEventListener("keydown", handleGesture);
+    window.addEventListener("click", handleGesture, { passive: true });
+    window.addEventListener("pointerdown", handleGesture, { passive: true });
+    window.addEventListener("touchstart", handleGesture, { passive: true });
+    window.addEventListener("keydown", handleGesture, { passive: true });
 
     return () => {
       window.removeEventListener("click", handleGesture);
@@ -41,18 +52,7 @@ export default function VideoLoader({ onComplete }) {
     };
   }, []);
 
-  // Keyboard shortcut (Escape to skip)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        handleFinish();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // 60FPS Falling Flower Petals Particle Engine
+  // 60FPS Golden Luxury Petals Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -69,26 +69,26 @@ export default function VideoLoader({ onComplete }) {
     };
     window.addEventListener("resize", handleResize);
 
-    const types = ["rose", "rose-dark", "marigold", "gold-sparkle", "petal-pink"];
-    const petalCount = 45;
+    const types = ["gold-sparkle", "rose-gold", "amber", "champagne", "marigold"];
+    const petalCount = 42;
     const petals = [];
 
     for (let i = 0; i < petalCount; i++) {
       petals.push({
         x: Math.random() * width,
         y: Math.random() * height - height,
-        size: Math.random() * 12 + 8,
-        speedY: Math.random() * 1.8 + 1.2,
-        speedX: Math.random() * 1.2 - 0.6,
+        size: Math.random() * 11 + 7,
+        speedY: Math.random() * 1.6 + 1.1,
+        speedX: Math.random() * 1.0 - 0.5,
         rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 2.5,
+        rotSpeed: (Math.random() - 0.5) * 2.2,
         flip: Math.random() * 360,
-        flipSpeed: Math.random() * 3 + 1,
+        flipSpeed: Math.random() * 2.8 + 1,
         swayAngle: Math.random() * Math.PI * 2,
-        swaySpeed: Math.random() * 0.03 + 0.015,
+        swaySpeed: Math.random() * 0.025 + 0.015,
         swayRadius: Math.random() * 2 + 1,
         type: types[Math.floor(Math.random() * types.length)],
-        opacity: Math.random() * 0.4 + 0.6,
+        opacity: Math.random() * 0.45 + 0.55,
       });
     }
 
@@ -110,16 +110,16 @@ export default function VideoLoader({ onComplete }) {
         ctx.fill();
       } else {
         let grad;
-        if (p.type === "rose") {
+        if (p.type === "rose-gold") {
           grad = ctx.createRadialGradient(-p.size * 0.2, -p.size * 0.2, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#ff4757");
+          grad.addColorStop(0, "#ff7675");
           grad.addColorStop(0.6, "#d63031");
-          grad.addColorStop(1, "#800020");
-        } else if (p.type === "rose-dark") {
+          grad.addColorStop(1, "#630018");
+        } else if (p.type === "amber") {
           grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#e84118");
-          grad.addColorStop(0.7, "#c23616");
-          grad.addColorStop(1, "#500");
+          grad.addColorStop(0, "#f9ca24");
+          grad.addColorStop(0.7, "#f0932b");
+          grad.addColorStop(1, "#994c00");
         } else if (p.type === "marigold") {
           grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
           grad.addColorStop(0, "#ffd32a");
@@ -127,9 +127,9 @@ export default function VideoLoader({ onComplete }) {
           grad.addColorStop(1, "#eb4d4b");
         } else {
           grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#ff9ff3");
-          grad.addColorStop(0.7, "#f368e0");
-          grad.addColorStop(1, "#b71540");
+          grad.addColorStop(0, "#fff5cc");
+          grad.addColorStop(0.7, "#f5c042");
+          grad.addColorStop(1, "#b8860b");
         }
 
         ctx.fillStyle = grad;
@@ -139,8 +139,8 @@ export default function VideoLoader({ onComplete }) {
         ctx.bezierCurveTo(-p.size * 0.9, p.size * 0.5, -p.size * 0.8, -p.size * 0.8, 0, -p.size);
         ctx.fill();
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 0.5;
         ctx.beginPath();
         ctx.moveTo(0, -p.size * 0.8);
         ctx.lineTo(0, p.size * 0.7);
@@ -182,45 +182,45 @@ export default function VideoLoader({ onComplete }) {
     };
   }, []);
 
-  // Video Autoplay Execution with Sound by Default
+  // Video Autoplay Execution with Sound ON by Default
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    // Set Sound ON by default
+    // Audio Default ON
     vid.muted = false;
     vid.volume = 1.0;
 
     const startPlayback = async () => {
       try {
         await vid.play();
-      } catch {
-        // If initial unmuted autoplay restricted by browser policy, play muted and let user interaction unmute seamlessly
+      } catch (err) {
+        // Browser Autoplay Policy suspended unmuted autoplay -> play muted first, unlock on gesture
         vid.muted = true;
         try {
           await vid.play();
-        } catch (err) {
-          console.log("Autoplay:", err);
+        } catch (e) {
+          console.log("Autoplay error:", e);
         }
       }
     };
 
     startPlayback();
 
-    // Fallback timer (maximum 8 seconds)
+    // Auto-advance fallback timer (maximum 8.5 seconds)
     const fallbackTimer = setTimeout(() => {
       handleFinish();
-    }, 8000);
+    }, 8500);
 
     return () => clearTimeout(fallbackTimer);
   }, []);
 
-  // Time & Progress update
+  // Time & Progress calculation
   const handleTimeUpdate = () => {
     if (videoRef.current && videoRef.current.duration) {
       const p = Math.min(
         100,
-        Math.max(5, (videoRef.current.currentTime / videoRef.current.duration) * 100)
+        Math.max(10, (videoRef.current.currentTime / videoRef.current.duration) * 100)
       );
       setProgress(p);
     }
@@ -234,17 +234,17 @@ export default function VideoLoader({ onComplete }) {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.04,
-            filter: "blur(8px)",
-            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            scale: 1.03,
+            filter: "blur(10px)",
+            transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
           }}
           className="fixed inset-0 w-screen h-screen z-[999999] flex flex-col items-center justify-center overflow-hidden select-none"
           style={{
-            background: "radial-gradient(circle at center, #1b1610 0%, #0c0a08 55%, #050505 100%)",
+            background: "radial-gradient(circle at center, #18130e 0%, #0c0a07 60%, #030303 100%)",
             fontFamily: "'Montserrat', sans-serif",
           }}
         >
-          {/* Falling Flower Petals & Sparkle Canvas */}
+          {/* Falling Flower Petals & Golden Ambient Canvas */}
           <canvas
             ref={canvasRef}
             className="absolute inset-0 w-full h-full pointer-events-none z-10"
@@ -252,73 +252,57 @@ export default function VideoLoader({ onComplete }) {
 
           {/* Ambient Golden Radial Glow */}
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] rounded-full pointer-events-none z-0 animate-pulse"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full pointer-events-none z-0 animate-pulse"
             style={{
-              background: "radial-gradient(circle, rgba(245, 192, 66, 0.22) 0%, rgba(201, 42, 42, 0.08) 45%, transparent 70%)",
-              filter: "blur(60px)",
+              background: "radial-gradient(circle, rgba(245, 192, 66, 0.25) 0%, rgba(201, 42, 42, 0.1) 45%, transparent 70%)",
+              filter: "blur(70px)",
             }}
           />
 
-          {/* Top Right Floating Skip Button */}
-          <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
-            <button
-              onClick={handleFinish}
-              type="button"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-black/40 hover:bg-black/60 text-[#fff3c4] text-xs font-semibold border border-[#f5c042]/30 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl active:scale-95 group"
-            >
-              <span style={{ fontFamily: "'Cinzel', serif", letterSpacing: "1.5px" }}>SKIP</span>
-              <ChevronRight
-                size={14}
-                className="transition-transform group-hover:translate-x-0.5 text-[#f5c042]"
-              />
-            </button>
-          </div>
-
-          {/* Main Loader Center Box */}
-          <div className="relative z-20 flex flex-col items-center text-center max-w-[90vw] px-4">
+          {/* Main Loader Content Center */}
+          <div className="relative z-20 flex flex-col items-center text-center max-w-[92vw] px-4">
             
-            {/* Welcoming Namaste Badge */}
+            {/* Auspicious Welcome Badge */}
             <motion.div
-              initial={{ opacity: 0, y: -15 }}
+              initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-5 py-1.5 mb-3 rounded-full border border-[#f5c042]/40 backdrop-blur-md shadow-lg"
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-5 py-1.5 mb-2 rounded-full border border-[#f5c042]/50 backdrop-blur-md shadow-lg"
               style={{
-                background: "linear-gradient(135deg, rgba(201, 42, 42, 0.28), rgba(245, 192, 66, 0.28))",
+                background: "linear-gradient(135deg, rgba(201, 42, 42, 0.35), rgba(245, 192, 66, 0.32))",
                 fontFamily: "'Cinzel', serif",
-                fontSize: "0.85rem",
+                fontSize: "0.82rem",
                 fontWeight: 600,
                 letterSpacing: "2.5px",
                 color: "#fff3c4",
                 textTransform: "uppercase",
               }}
             >
-              <span className="text-[#f5c042]">✨</span>
+              <Sparkles size={13} className="text-[#f5c042]" />
               <span>Auspicious Welcome</span>
-              <span className="text-[#f5c042]">✨</span>
+              <Sparkles size={13} className="text-[#f5c042]" />
             </motion.div>
 
-            {/* Namaste Video Avatar with Golden Mandala Rings */}
-            <div className="relative w-[210px] h-[210px] sm:w-[235px] sm:h-[235px] my-3 flex items-center justify-center">
-              
+            {/* Namaste Video Avatar with Golden Rings */}
+            <div className="relative w-[215px] h-[215px] sm:w-[245px] sm:h-[245px] my-3 flex items-center justify-center group">
               {/* Outer Spinning Golden Mandala Dashed Ring */}
               <div
-                className="absolute w-[240px] h-[240px] sm:w-[265px] sm:h-[265px] rounded-full border border-dashed border-[#f5c042]/75 animate-spin [animation-duration:20s]"
+                className="absolute w-[248px] h-[248px] sm:w-[278px] sm:h-[278px] rounded-full border border-dashed border-[#f5c042]/75 animate-spin [animation-duration:22s]"
                 style={{
-                  boxShadow: "0 0 28px rgba(245, 192, 66, 0.4)",
+                  boxShadow: "0 0 30px rgba(245, 192, 66, 0.4)",
                 }}
               />
 
-              {/* Middle Spinning Dual Gradient Ring */}
+              {/* Middle Spinning Gradient Ring */}
               <div
-                className="absolute w-[224px] h-[224px] sm:w-[248px] sm:h-[248px] rounded-full border-2 border-transparent border-t-[#f5c042] border-b-[#e6a827] animate-spin [animation-duration:10s] [animation-direction:reverse]"
+                className="absolute w-[230px] h-[230px] sm:w-[258px] sm:h-[258px] rounded-full border-2 border-transparent border-t-[#f5c042] border-b-[#d4af37] animate-spin [animation-duration:12s] [animation-direction:reverse]"
               />
 
-              {/* Central Video Avatar Frame */}
+              {/* Central Video Frame */}
               <div
-                className="relative w-[200px] h-[200px] sm:w-[225px] sm:h-[225px] rounded-full overflow-hidden border-[3px] border-[#f5c042] bg-black shadow-2xl flex items-center justify-center"
+                className="relative w-[205px] h-[205px] sm:w-[235px] sm:h-[235px] rounded-full overflow-hidden border-[3px] border-[#f5c042] bg-black shadow-2xl flex items-center justify-center group-hover:border-[#fff3c4] transition-all duration-300"
                 style={{
-                  boxShadow: "0 0 40px rgba(245, 192, 66, 0.55), inset 0 0 15px rgba(0, 0, 0, 0.5)",
+                  boxShadow: "0 0 45px rgba(245, 192, 66, 0.6), inset 0 0 20px rgba(0, 0, 0, 0.6)",
                 }}
               >
                 <video
@@ -330,8 +314,10 @@ export default function VideoLoader({ onComplete }) {
                   onEnded={handleFinish}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedData={() => {
-                    if (videoRef.current) {
-                      videoRef.current.play().catch(() => {});
+                    const vid = videoRef.current;
+                    if (vid) {
+                      vid.volume = 1.0;
+                      vid.play().catch(() => {});
                     }
                   }}
                   style={{
@@ -340,7 +326,7 @@ export default function VideoLoader({ onComplete }) {
                     objectFit: "cover",
                     objectPosition: "center 25%",
                     display: "block",
-                    filter: "contrast(1.05) saturate(1.08) brightness(1.02)",
+                    filter: "contrast(1.06) saturate(1.1) brightness(1.02)",
                   }}
                 />
 
@@ -351,26 +337,26 @@ export default function VideoLoader({ onComplete }) {
 
             {/* Typography */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="mt-3 flex flex-col items-center"
+              className="mt-2 flex flex-col items-center"
             >
               <div
-                className="text-xs sm:text-sm uppercase tracking-[5px] text-white/80 mb-1"
+                className="text-[11px] sm:text-xs uppercase tracking-[5px] text-[#e0d0b5]/90 mb-1"
                 style={{ fontFamily: "'Montserrat', sans-serif" }}
               >
                 Welcome to
               </div>
 
               <h1
-                className="text-2xl sm:text-4xl font-extrabold uppercase tracking-[3px] my-1"
+                className="text-2xl sm:text-4xl font-extrabold uppercase tracking-[3.5px] my-1"
                 style={{
                   fontFamily: "'Cinzel', 'Playfair Display', serif",
-                  background: "linear-gradient(135deg, #ffffff 0%, #fff3c4 25%, #f5c042 50%, #e6a827 75%, #b8860b 100%)",
+                  background: "linear-gradient(135deg, #ffffff 0%, #fff3c4 25%, #f5c042 55%, #e6a827 80%, #b8860b 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                  textShadow: "0 0 25px rgba(245, 192, 66, 0.35)",
+                  textShadow: "0 0 30px rgba(245, 192, 66, 0.4)",
                 }}
               >
                 Edge Expert Realty
@@ -392,7 +378,7 @@ export default function VideoLoader({ onComplete }) {
                   style={{
                     width: `${progress}%`,
                     background: "linear-gradient(90deg, #c92a2a 0%, #f5c042 50%, #fff3c4 100%)",
-                    boxShadow: "0 0 12px #f5c042",
+                    boxShadow: "0 0 14px #f5c042",
                   }}
                   transition={{ ease: "easeOut", duration: 0.1 }}
                 />
@@ -406,11 +392,6 @@ export default function VideoLoader({ onComplete }) {
               </div>
             </div>
 
-          </div>
-
-          {/* ESC Shortcut Indicator at Bottom */}
-          <div className="absolute bottom-4 text-[11px] text-[#e0d0b5]/50 font-light">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/80 font-mono text-[9px] border border-white/10">ESC</kbd> to skip
           </div>
         </motion.div>
       )}
