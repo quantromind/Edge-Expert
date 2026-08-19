@@ -22,6 +22,7 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 // 🏢 Real Estate Financial Data
 const aumData = [
@@ -547,7 +548,11 @@ const InvestorRelations = () => {
               </div>
               <div className="flex items-center gap-3 text-slate-300">
                 <Phone size={14} className="text-teal-400" />
-                <a href="tel:07385327808" className="hover:text-teal-400 transition">073853 27808</a>
+                <a href="tel:+917385327808" className="hover:text-teal-400 transition">+91 73853 27808</a>
+              </div>
+              <div className="flex items-center gap-3 text-slate-300">
+                <FaWhatsapp size={14} className="text-emerald-400" />
+                <a href="https://wa.me/917385327808" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">WhatsApp: +91 73853 27808</a>
               </div>
               <div className="flex items-start gap-3 text-slate-300">
                 <MapPin size={14} className="text-teal-400 mt-1 flex-shrink-0" />

@@ -39,6 +39,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import projectsData from "./ProjectData";
 
 const ProjectDetails = () => {
@@ -876,16 +877,23 @@ const ProjectDetails = () => {
                 <div className="space-y-3">
                   <button 
                     onClick={handleCallClick}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-medium"
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-medium cursor-pointer"
                   >
                     <Phone className="w-5 h-5" />
                     {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                      ? `Call ${property.agent?.phone || "+91 98765 43210"}` 
-                      : `Copy ${property.agent?.phone || "+91 98765 43210"}`}
+                      ? `Call ${property.agent?.phone || "+91 73853 27808"}` 
+                      : `Copy ${property.agent?.phone || "+91 73853 27808"}`}
+                  </button>
+                  <button 
+                    onClick={() => window.open(`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I am interested in project: ${property?.title || 'this project'} located at ${property?.location || ''}`)}`, '_blank')}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 font-medium cursor-pointer"
+                  >
+                    <FaWhatsapp className="w-5 h-5" />
+                    WhatsApp Chat
                   </button>
                   <button 
                     onClick={handleEmailClick}
-                    className="w-full border-2 border-blue-500 text-blue-500 hover:bg-blue-50 py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3 font-medium"
+                    className="w-full border-2 border-blue-500 text-blue-500 hover:bg-blue-50 py-3 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3 font-medium cursor-pointer"
                   >
                     <Mail className="w-5 h-5" />
                     Email Agent

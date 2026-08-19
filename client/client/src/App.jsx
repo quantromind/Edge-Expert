@@ -10,6 +10,7 @@ import ComponentWrapper from "./components/ComponentWrapper";
 import Navbar from "./common/Navbar";
 import Footer from "./common/Footer";
 import VideoLoader from "./common/VideoLoader";
+import FloatingContact from "./common/FloatingContact";
 
 // Core Pages
 import HomePage from "./components/Homesection/HomePage";
@@ -337,7 +338,12 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
 
-          {!shouldHideNavAndFooter && <Footer />}
+          {!shouldHideNavAndFooter && (
+            <>
+              <FloatingContact />
+              <Footer />
+            </>
+          )}
         </div>
       </HelmetProvider>
     </GoogleOAuthProvider>

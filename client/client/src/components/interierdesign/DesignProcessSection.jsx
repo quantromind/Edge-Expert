@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Star,
   MapPin,
@@ -8,6 +9,7 @@ import {
   MessageCircle,
   Calendar,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 // =====================
@@ -116,6 +118,7 @@ const designerData = [
 // Main Component
 // =====================
 const DesignProcessSection = () => {
+  const navigate = useNavigate();
   const [selectedDesigner, setSelectedDesigner] = useState(designerData[0]);
   const scrollRef = useRef(null);
 
@@ -244,13 +247,33 @@ const DesignProcessSection = () => {
 
             {/* Action Buttons */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[{ label: "Call Now", Icon: Phone }, { label: "WhatsApp", Icon: MessageCircle }, { label: "Book Meeting", Icon: Calendar }].map(
+              {[
+                { 
+                  label: "Call Now", 
+                  Icon: Phone,
+                  action: () => window.open("tel:+917385327808")
+                }, 
+                { 
+                  label: "WhatsApp", 
+                  Icon: FaWhatsapp,
+                  action: () => window.open(`https://wa.me/917385327808?text=${encodeURIComponent(`Hello Edge Expert, I want to inquire about interior design services with ${selectedDesigner.name}.`)}`, "_blank")
+                }, 
+                { 
+                  label: "Book Meeting", 
+                  Icon: Calendar,
+                  action: () => {
+                    navigate("/enquiry");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }
+              ].map(
                 (btn, i) => (
                   <motion.button
                     key={i}
+                    onClick={btn.action}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-300"
+                    className="flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold rounded-xl shadow-lg transition-all duration-300 cursor-pointer"
                   >
                     <btn.Icon className="h-5 w-5" />
                     {btn.label}

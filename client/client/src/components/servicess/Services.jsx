@@ -39,7 +39,7 @@ export default function PropertySearch() {
       bhk: "2, 3 BHK Apartments",
       location: "Kharadi, Pune",
       image: Image1,
-      phone: "+91 9876543210",
+      phone: "+91 7385327808",
     },
     {
       price: "₹1.54 Cr - 3.14 Cr",
@@ -48,7 +48,7 @@ export default function PropertySearch() {
       bhk: "3, 3.5, 4, 4.5 BHK Apartments",
       location: "Akurdi, Pune",
       image: Image2,
-      phone: "+91 9123456780",
+      phone: "+91 7385327808",
     },
     {
       price: "₹2.23 Cr - 4.07 Cr",
@@ -57,7 +57,7 @@ export default function PropertySearch() {
       bhk: "3, 4, 4.5 BHK Apartments",
       location: "Viman Nagar, Pune",
       image: Image3,
-      phone: "+91 9988776655",
+      phone: "+91 7385327808",
     },
   ];
 
@@ -366,10 +366,20 @@ export default function PropertySearch() {
                   <p className="font-medium text-sm sm:text-lg text-gray-800">
                     {selectedBuilder.developer}
                   </p>
-                  <p className="text-indigo-600 text-xs sm:text-sm flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5" />
-                    {selectedBuilder.phone}
-                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <a href="tel:+917385327808" className="text-indigo-600 hover:text-indigo-800 text-xs sm:text-sm flex items-center gap-1 font-medium">
+                      <Phone className="w-3.5 h-3.5" />
+                      +91 73853 27808
+                    </a>
+                    <a 
+                      href={`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I want to inquire about ${selectedBuilder.name} by ${selectedBuilder.developer}`)}`}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-emerald-600 hover:text-emerald-800 text-xs sm:text-sm flex items-center gap-1 font-medium"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
                 </div>
               </div>
 

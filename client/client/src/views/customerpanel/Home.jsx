@@ -157,7 +157,7 @@
 //           <div>
 //             <h5 className="font-semibold text-white mb-3">Contact</h5>
 //             <p className="text-sm">Email: support@edgeexpert.com</p>
-//             <p className="text-sm">Phone: +91 90000 00000</p>
+//             <p className="text-sm">Phone: +91 73853 27808</p>
 //           </div>
 //         </div>
 
@@ -384,7 +384,7 @@ export default function HomePage({ userData }) {
               Email: support@edgeexpert.com
             </p>
             <p className="text-sm">
-              Phone: +91 90000 00000
+              Phone: <a href="tel:+917385327808" className="hover:text-blue-400 underline">+91 73853 27808</a>
             </p>
           </div>
         </div>

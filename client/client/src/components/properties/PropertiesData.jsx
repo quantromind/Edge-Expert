@@ -83,7 +83,7 @@ const properties = [
     agent: {
       name: "Amit Kapoor",
       email: "amit@edgeexpert.com",
-      phone: "9876543210",
+      phone: "+91 73853 27808",
       rating: 4.9,
       reviews: 42,
       specialTag: "edgeexpert.com Agent",
@@ -167,7 +167,7 @@ const properties = [
     agent: {
       name: "Rahul Mehta",
       email: "rahul@edgeexpert.com",
-      phone: "9876512345",
+      phone: "+91 73853 27808",
       rating: 4.6,
       reviews: 18,
       specialTag: "PG Specialist",
@@ -210,7 +210,7 @@ const properties = [
     agent: {
       name: "Neha Sharma",
       email: "neha@edgeexpert.com",
-      phone: "9876523456",
+      phone: "+91 73853 27808",
       rating: 4.8,
       reviews: 25,
       specialTag: "Certified Agent",
@@ -255,7 +255,7 @@ const properties = [
     agent: {
       name: "Suresh Menon",
       email: "suresh@edgeexpert.com",
-      phone: "9876534567",
+      phone: "+91 73853 27808",
       rating: 4.5,
       reviews: 20,
       specialTag: "Certified Agent",
@@ -296,7 +296,7 @@ const properties = [
     agent: {
       name: "Anjali Nair",
       email: "anjali@edgeexpert.com",
-      phone: "9876567890",
+      phone: "+91 73853 27808",
       rating: 4.8,
       reviews: 22,
       specialTag: "PG Manager",
@@ -341,7 +341,7 @@ const properties = [
     agent: {
       name: "Vikas Patil",
       email: "vikas@edgeexpert.com",
-      phone: "9876556789",
+      phone: "+91 73853 27808",
       rating: 4.7,
       reviews: 28,
       specialTag: "Certified Agent",
@@ -399,7 +399,7 @@ const properties = [
     agent: {
       name: "Priya Shah",
       email: "priya@edgeexpert.com",
-      phone: "9876543211",
+      phone: "+91 73853 27808",
       rating: 4.9,
       reviews: 67,
       specialTag: "Luxury Specialist",
@@ -450,7 +450,7 @@ const properties = [
     agent: {
       name: "Rajesh Iyer",
       email: "rajesh@edgeexpert.com",
-      phone: "9876543212",
+      phone: "+91 73853 27808",
       rating: 4.7,
       reviews: 45,
       specialTag: "Commercial Expert",
@@ -501,7 +501,7 @@ const properties = [
     agent: {
       name: "Ananya Reddy",
       email: "ananya@edgeexpert.com",
-      phone: "9876543213",
+      phone: "+91 73853 27808",
       rating: 4.8,
       reviews: 32,
       specialTag: "Rental Specialist",
@@ -552,7 +552,7 @@ const properties = [
     agent: {
       name: "Sameer Joshi",
       email: "sameer@edgeexpert.com",
-      phone: "9876543214",
+      phone: "+91 73853 27808",
       rating: 4.6,
       reviews: 28,
       specialTag: "Plot Specialist",
@@ -603,7 +603,7 @@ const properties = [
   //   agent: {
   //     name: "Karthik Nair",
   //     email: "karthik@edgeexpert.com",
-  //     phone: "9876543215",
+  //     phone: "+91 73853 27808",
   //     rating: 4.9,
   //     reviews: 51,
   //     specialTag: "Co-living Expert",

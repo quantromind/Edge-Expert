@@ -40,6 +40,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FaWhatsapp } from "react-icons/fa";
 import properties from "./PropertiesData";
 
 const PropertyDetails = () => {
@@ -793,7 +794,7 @@ const PropertyDetails = () => {
                         alert(`Phone number ${phone} copied to clipboard!`);
                       }
                     }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 cursor-pointer"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 cursor-pointer"
                   >
                     <Phone className="w-5 h-5" />
                     {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -801,12 +802,19 @@ const PropertyDetails = () => {
                       : `Copy ${property.agent?.phone || "+91 73853 27808"}`}
                   </button>
                   <button 
+                    onClick={() => window.open(`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I am interested in: ${property?.title || 'this property'} located at ${property?.location || ''}`)}`, '_blank')}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 cursor-pointer"
+                  >
+                    <FaWhatsapp className="w-5 h-5" />
+                    WhatsApp Chat
+                  </button>
+                  <button 
                     onClick={() => {
                       const email = property.agent?.email || "sales@edgeexpert.com";
                       const name = property.agent?.name || "Agent";
                       window.open(`mailto:${email}?subject=${encodeURIComponent(`Inquiry about ${property.title}`)}&body=${encodeURIComponent(`Hello ${name},\n\nI am interested in ${property.title}.\n\nBest regards`)}`);
                     }}
-                    className="w-full border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold py-4 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3"
+                    className="w-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 font-semibold py-3 rounded-xl transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer"
                   >
                     <Mail className="w-5 h-5" />
                     Email Agent

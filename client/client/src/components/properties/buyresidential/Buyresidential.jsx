@@ -32,11 +32,11 @@ const BuyResidential = () => {
             price: `₹${(item.price / 10000000).toFixed(2)} Cr`,
             image: item.images && item.images.length > 0 ? item.images[0] : "/no-image.jpg",
             status: item.propertystatus || "Available",
-            owner: item.owner,
-            phone: item.phone,
+            owner: item.owner || "Edge Expert Partner",
+            phone: item.phone || "+91 73853 27808",
             details: [
-              `Owner: ${item.owner || 'N/A'}`,
-              `Phone: ${item.phone || 'N/A'}`,
+              `Owner: ${item.owner || 'Edge Expert Partner'}`,
+              `Phone: ${item.phone || '+91 73853 27808'}`,
               "Premium Location",
               "Modern Amenities",
               "Ready to Move"

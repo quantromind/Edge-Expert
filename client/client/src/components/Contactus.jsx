@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import ComponentWrapper from "./ComponentWrapper";
 
 const Contactus = () => {
@@ -82,8 +83,23 @@ const Contactus = () => {
                 <div>
                   <p className="text-xs text-gray-500 font-medium">Call Us</p>
                   <a
-                    href="tel:07385327808"
+                    href="tel:+917385327808"
                     className="text-lg font-bold text-gray-900 hover:text-teal-600 transition"
+                  >
+                    +91 73853 27808
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4 bg-white/40 backdrop-blur-sm p-5 rounded-2xl border border-white/60 hover:bg-white/60 transition duration-300 shadow-sm">
+                <FaWhatsapp className="w-6 h-6 text-emerald-600 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">WhatsApp Us</p>
+                  <a
+                    href="https://wa.me/917385327808"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-lg font-bold text-emerald-700 hover:text-emerald-800 transition"
                   >
                     +91 73853 27808
                   </a>

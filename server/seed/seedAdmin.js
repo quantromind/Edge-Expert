@@ -20,7 +20,7 @@ const seedAdmin = async () => {
       name: "Edge Expert Admin",
       email: "admin@edgeexpert.com",
       password: "Admin@123",
-      phone: "9100000000",
+      phone: "7385327808",
       role: "admin",
       isActive: true,
       isVerified: true,

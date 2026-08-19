@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Facebook, Instagram, Linkedin, MapPin, Mail, Phone } from "lucide-react";
+import { Facebook, Instagram, Linkedin, MapPin, Mail, Phone, MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -176,7 +177,11 @@ const Footer = () => {
                 </p>
                 <p className="flex items-center text-sm text-gray-400">
                   <Phone size={20} className={`${mainColor} mr-3 flex-shrink-0`} />
-                  <a href="tel:07385327808" className="hover:text-teal-400 transition">073853 27808</a>
+                  <a href="tel:+917385327808" className="hover:text-teal-400 transition">+91 73853 27808</a>
+                </p>
+                <p className="flex items-center text-sm text-gray-400">
+                  <FaWhatsapp size={20} className="text-emerald-400 mr-3 flex-shrink-0" />
+                  <a href="https://wa.me/917385327808" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">WhatsApp: +91 73853 27808</a>
                 </p>
               </div>
             </div>

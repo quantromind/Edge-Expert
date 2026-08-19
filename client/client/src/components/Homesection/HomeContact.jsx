@@ -1,10 +1,12 @@
 import React from "react";
 import { Mail, Phone, MapPin, Clock, MessageCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 // Contact details
 const contactInfo = [
-  { icon: Phone, text: "073853 27808", href: "tel:07385327808" },
+  { icon: Phone, text: "+91 73853 27808", href: "tel:+917385327808" },
+  { icon: FaWhatsapp, text: "WhatsApp: +91 73853 27808", href: "https://wa.me/917385327808" },
   { icon: Mail, text: "hello@edgeexpert.in", href: "mailto:hello@edgeexpert.in" },
   { icon: MapPin, text: "Miraroad, Mumbai, Maharashtra, India 401107", href: "https://maps.google.com/?q=Miraroad,Mumbai,India,401107" },
   { icon: Clock, text: "Always open", href: "#" },

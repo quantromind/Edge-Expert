@@ -264,14 +264,20 @@ const CommercialDetails = () => {
             <h3 className="text-xl font-bold text-gray-800 mb-4">
               Connect with Expert
             </h3>
-            <p className="text-red-600 font-semibold text-2xl mb-4">
-              +91 90000 00000
-            </p>
-            <button className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-3 rounded-lg w-full transition-colors shadow-md text-lg">
-              Contact Agent
+            <a href="tel:+917385327808" className="text-red-600 hover:text-red-700 font-semibold text-2xl mb-4 block">
+              +91 73853 27808
+            </a>
+            <button 
+              onClick={() => window.open(`https://wa.me/917385327808?text=${encodeURIComponent(`Hello, I am interested in commercial property: ${property?.title || 'commercial property'}`)}`, '_blank')}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-3 rounded-lg w-full transition-colors shadow-md text-lg cursor-pointer flex items-center justify-center gap-2"
+            >
+              WhatsApp Agent
             </button>
-            <button className="mt-3 border border-red-600 text-red-600 font-semibold px-5 py-3 rounded-lg w-full hover:bg-red-50 transition-colors text-lg">
-              Get Call Back
+            <button 
+              onClick={() => window.open("tel:+917385327808")}
+              className="mt-3 border border-red-600 text-red-600 font-semibold px-5 py-3 rounded-lg w-full hover:bg-red-50 transition-colors text-lg cursor-pointer"
+            >
+              Call Now
             </button>
           </div>
 
