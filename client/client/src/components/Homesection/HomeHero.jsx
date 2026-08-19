@@ -34,10 +34,10 @@ const SLIDE_DATA = [
     titleHighlight: "Dream Property",
     titleSuffix: "with Edge Expert",
     subtitle: "Discover verified residential homes, luxury villas, and top builder projects with complete legal transparency and direct builder pricing.",
-    showSearch: true,
+    showSearch: false,
     showPillars: true,
-    primaryBtn: { text: "Login / Signup", link: "/loginregister" },
-    secondaryBtn: { text: "Explore Properties", link: "/properties" },
+    primaryBtn: { text: "Explore Properties", link: "/properties" },
+    secondaryBtn: { text: "View Builder Projects", link: "/projects" },
   },
   {
     id: 1,

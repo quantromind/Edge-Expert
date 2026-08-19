@@ -133,20 +133,13 @@ export default function VideoLoader({ onComplete }) {
             </motion.button>
           </div>
 
-          {/* Bottom Sleek Progress Overlay */}
-          <div className="absolute bottom-5 left-0 right-0 z-30 max-w-lg mx-auto px-6 flex flex-col items-center gap-2 pointer-events-none">
-            <div className="w-full bg-white/20 h-1 rounded-full overflow-hidden backdrop-blur-md">
-              <motion.div
-                className="h-full bg-gradient-to-r from-teal-400 via-blue-400 to-[#3BAFDA]"
-                style={{ width: `${progress}%` }}
-                transition={{ ease: "linear" }}
-              />
-            </div>
-
-            <div className="flex items-center justify-between w-full text-xs text-white/80 drop-shadow-md">
-              <span className="font-semibold tracking-wider uppercase text-amber-300">Edge Expert</span>
-              <span className="text-[11px] text-white/60 font-medium">Loading Experience...</span>
-            </div>
+          {/* Sleek Minimal Progress Line at the very bottom edge */}
+          <div className="absolute bottom-0 left-0 right-0 z-30 w-full h-1 bg-white/10 overflow-hidden pointer-events-none">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-400 via-teal-400 to-[#3BAFDA] shadow-[0_0_12px_rgba(59,175,218,0.8)]"
+              style={{ width: `${progress}%` }}
+              transition={{ ease: "linear" }}
+            />
           </div>
         </motion.div>
       )}

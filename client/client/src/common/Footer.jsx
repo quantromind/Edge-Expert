@@ -339,10 +339,10 @@ const Footer = () => {
         </div>
 
         {/* COPYRIGHT */}
-        <div className="mt-10 text-center text-xs text-gray-600 border-t border-gray-800 pt-5">
+        <div className="mt-10 text-center text-xs text-gray-500 border-t border-gray-800 pt-5">
           © {new Date().getFullYear()}{" "}
           <span className="text-gray-300 font-semibold">
-            Umbharkar Technologies Pvt. Ltd.
+            Quantromind Private Limited.
           </span>{" "}
           All Rights Reserved. | Site Map | Disclaimer
         </div>

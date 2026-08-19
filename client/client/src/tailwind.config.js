@@ -35,7 +35,7 @@ module.exports = {
         black: "900",
       },
       fontSize: {
-        // Card title sizes - financesbazar.com style
+        // Custom card typography scale
         "card-title": ["1.25rem", { lineHeight: "1.3", fontWeight: "700" }],
         "card-subtitle": ["1rem", { lineHeight: "1.4", fontWeight: "600" }],
         "card-description": [

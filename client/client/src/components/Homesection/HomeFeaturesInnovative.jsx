@@ -15,19 +15,19 @@ const pick2 = "https://tcpdesignstudio.com/wp-content/uploads/2024/05/DSC01808.w
 const pick4 = "https://media.istockphoto.com/id/1829003668/photo/a-young-woman-in-protective-gloves-washes-the-floor-with-a-brush-and-detergent.jpg?s=612x612&w=0&k=20&c=02F2sZZHnE-60s-AbLmis6z0gx7LVkpXkLwEBNRxSyI=";
 
 
-// --- FinancesBazar content to display in the left column (as requested)
-const financesBazarInfo = [
+// --- Edge Expert Realty Info
+const edgeExpertInfo = [
   {
-    title: "What is FinancesBazar?",
-    desc: "FinancesBazar is a comprehensive financial platform offering tools, insights, and resources to help users make informed decisions about investments, loans, credit, insurance, and personal finance management.",
+    title: "Verified Real Estate Advisory",
+    desc: "Comprehensive property advisory offering verified listings, builder price guarantees, and complete legal documentation support.",
   },
   {
     title: "Key Offerings",
-    desc: "Loan and credit card comparisons, EMI & SIP calculators, investment planners, credit score insights, and practical money-saving guides.",
+    desc: "Direct builder partnerships, RERA-approved homes, commercial office hubs, luxury villas, and smart investment portfolios.",
   },
   {
     title: "Who is it for?",
-    desc: "Individuals, families, and small businesses looking for clear, trustworthy financial tools and comparisons to make better money decisions.",
+    desc: "Homebuyers, investors, NRI clients, and enterprises seeking transparent, high-yield, and hassle-free property purchases across India.",
   },
 ];
 
@@ -123,11 +123,11 @@ const NewsSection = () => {
 
             <div className="relative z-10">
               <h2 className="text-3xl font-semibold mb-6 border-b border-purple-400 pb-3">
-                FinancesBazar
+                Edge Expert Realty
               </h2>
 
               <motion.div variants={containerVariants} initial="hidden" animate="visible">
-                {financesBazarInfo.map((info, idx) => (
+                {edgeExpertInfo.map((info, idx) => (
                   <motion.div
                     key={idx}
                     variants={{
@@ -148,14 +148,12 @@ const NewsSection = () => {
 
                 {/* Visit Link */}
                 <div className="mt-4 pt-2">
-                  <a
-                    href="https://financesbazar.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-white"
+                  <button
+                    onClick={() => navigate("/properties")}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-purple-200 transition cursor-pointer"
                   >
-                    Visit FinancesBazar <ArrowRight className="w-4 h-4 text-white" />
-                  </a>
+                    Explore Verified Properties <ArrowRight className="w-4 h-4 text-white" />
+                  </button>
                 </div>
               </motion.div>
             </div>
