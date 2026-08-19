@@ -1,24 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Volume2, VolumeX } from "lucide-react";
 import loadingVideo from "../assets/video/loadingpage.mp4";
 
 export default function VideoLoader({ onComplete }) {
   const [showLoader, setShowLoader] = useState(true);
-  const [progress, setProgress] = useState(10);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const canvasRef = useRef(null);
   const videoRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const progressTextRef = useRef(null);
   const animFrameId = useRef(null);
+  const progressIntervalRef = useRef(null);
+  const hasFinishedRef = useRef(false);
 
   const handleFinish = () => {
+    if (hasFinishedRef.current) return;
+    hasFinishedRef.current = true;
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
     setShowLoader(false);
     if (onComplete) {
       onComplete();
     }
   };
 
-  // High-Performance 60FPS Golden Luxury Petals (Pre-rendered Sprites for Zero CPU Lag)
+  // High-Performance 60FPS Golden Luxury Petals (Zero CPU Overhead)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -35,8 +42,8 @@ export default function VideoLoader({ onComplete }) {
     };
     window.addEventListener("resize", handleResize, { passive: true });
 
-    // Pre-render 5 petal types on offscreen canvases for silky-smooth 60fps with ZERO lag
-    const spriteSize = 32;
+    // Pre-rendered offscreen sprite canvases
+    const spriteSize = 30;
     const colorThemes = [
       { c1: "rgba(255, 245, 190, 0.95)", c2: "rgba(245, 192, 66, 0.7)", c3: "rgba(245, 192, 66, 0)" },
       { c1: "#ff7675", c2: "#d63031", c3: "#630018" },
@@ -68,25 +75,25 @@ export default function VideoLoader({ onComplete }) {
       return offCanvas;
     });
 
-    const petalCount = 26;
+    const petalCount = 24;
     const petals = [];
 
     for (let i = 0; i < petalCount; i++) {
       petals.push({
         x: Math.random() * width,
         y: Math.random() * height - height,
-        size: Math.random() * 11 + 9,
-        speedY: Math.random() * 1.3 + 0.8,
-        speedX: Math.random() * 0.8 - 0.4,
+        size: Math.random() * 10 + 8,
+        speedY: Math.random() * 1.2 + 0.7,
+        speedX: Math.random() * 0.6 - 0.3,
         rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 1.6,
+        rotSpeed: (Math.random() - 0.5) * 1.4,
         flip: Math.random() * 360,
-        flipSpeed: Math.random() * 2.0 + 0.8,
+        flipSpeed: Math.random() * 1.8 + 0.8,
         swayAngle: Math.random() * Math.PI * 2,
         swaySpeed: Math.random() * 0.02 + 0.01,
-        swayRadius: Math.random() * 1.6 + 0.8,
+        swayRadius: Math.random() * 1.4 + 0.6,
         spriteIndex: Math.floor(Math.random() * sprites.length),
-        opacity: Math.random() * 0.4 + 0.6,
+        opacity: Math.random() * 0.35 + 0.65,
       });
     }
 
@@ -128,58 +135,154 @@ export default function VideoLoader({ onComplete }) {
     };
   }, []);
 
-  // Direct Autoplay with Sound Permanently ON (Mobile & Desktop)
+  // Toggle or Unmute Sound
+  const toggleSound = (e) => {
+    if (e) e.stopPropagation();
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    if (vid.muted) {
+      vid.muted = false;
+      vid.volume = 1.0;
+      setIsMuted(false);
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // If browser rejects, keep muted
+          vid.muted = true;
+          setIsMuted(true);
+        });
+      }
+    } else {
+      vid.muted = true;
+      setIsMuted(true);
+    }
+  };
+
+  // Robust Non-Blocking Video Playback Engine
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    // Force Audio ON
-    vid.muted = false;
-    vid.defaultMuted = false;
+    // 1. Set required attributes for zero-friction mobile/desktop autoplay
+    vid.muted = true;
+    vid.defaultMuted = true;
     vid.volume = 1.0;
+    vid.playsInline = true;
 
-    const playVideo = async () => {
-      try {
-        vid.muted = false;
-        vid.defaultMuted = false;
-        vid.volume = 1.0;
-        await vid.play();
-        setVideoLoaded(true);
-      } catch (err) {
-        // Direct playback attempt
-        try {
-          vid.muted = false;
-          vid.volume = 1.0;
-          await vid.play();
-          setVideoLoaded(true);
-        } catch (e) {
-          try {
+    // 2. Immediate Autoplay Attempt
+    const attemptPlay = () => {
+      const playPromise = vid.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Autoplay successfully started (muted)
+            // 3. Try to seamlessly unmute if browser allows (Desktop with engagement)
+            tryUnmuteSilently();
+          })
+          .catch((err) => {
+            console.log("Initial autoplay fallback:", err);
             vid.muted = true;
-            await vid.play();
-            setVideoLoaded(true);
-            vid.muted = false;
-          } catch (ex) {}
+            vid.play().catch(() => {});
+          });
+      }
+    };
+
+    // Try unmuting silently without interrupting video flow
+    const tryUnmuteSilently = () => {
+      // Check if browser allows unmuted audio
+      if (vid && vid.muted) {
+        vid.muted = false;
+        const p = vid.play();
+        if (p !== undefined) {
+          p.then(() => {
+            setIsMuted(false);
+          }).catch(() => {
+            // Browser blocked unmuted autoplay -> keep playing muted smoothly!
+            vid.muted = true;
+            setIsMuted(true);
+            vid.play().catch(() => {});
+          });
         }
       }
     };
 
-    playVideo();
+    attemptPlay();
 
+    // 4. Instant Unmute on the VERY FIRST touch/click anywhere on the screen
+    const handleGlobalInteraction = () => {
+      if (vid && vid.muted) {
+        vid.muted = false;
+        vid.volume = 1.0;
+        setIsMuted(false);
+        const p = vid.play();
+        if (p !== undefined) {
+          p.catch(() => {
+            // Fallback if needed
+            vid.muted = true;
+            setIsMuted(true);
+            vid.play().catch(() => {});
+          });
+        }
+      }
+    };
+
+    const interactionEvents = ["pointerdown", "touchstart", "click", "keydown"];
+    interactionEvents.forEach((ev) =>
+      window.addEventListener(ev, handleGlobalInteraction, { passive: true, once: true })
+    );
+
+    // 5. Dynamic Progress Bar Animation & Watchdog
+    let simulatedProgress = 10;
+    progressIntervalRef.current = setInterval(() => {
+      if (hasFinishedRef.current) return;
+      if (vid && vid.duration && vid.duration > 0) {
+        const actualProgress = (vid.currentTime / vid.duration) * 100;
+        simulatedProgress = Math.max(simulatedProgress, actualProgress);
+      } else {
+        // Smooth increment even if video buffer takes 200ms
+        simulatedProgress = Math.min(simulatedProgress + 4, 90);
+      }
+
+      const pClamped = Math.min(100, Math.max(10, Math.round(simulatedProgress)));
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${pClamped}%`;
+      }
+      if (progressTextRef.current) {
+        progressTextRef.current.innerText = `${pClamped}%`;
+      }
+
+      if (simulatedProgress >= 100) {
+        handleFinish();
+      }
+    }, 100);
+
+    // 6. Absolute Fallback Timer (Never traps the user)
     const fallbackTimer = setTimeout(() => {
       handleFinish();
-    }, 8500);
+    }, 6500);
 
-    return () => clearTimeout(fallbackTimer);
+    return () => {
+      clearTimeout(fallbackTimer);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+      interactionEvents.forEach((ev) => window.removeEventListener(ev, handleGlobalInteraction));
+    };
   }, []);
 
-  // Time & Progress calculation
+  // Update progress directly from video time update
   const handleTimeUpdate = () => {
-    if (videoRef.current && videoRef.current.duration) {
-      const p = Math.min(
-        100,
-        Math.max(10, (videoRef.current.currentTime / videoRef.current.duration) * 100)
-      );
-      setProgress(p);
+    const vid = videoRef.current;
+    if (vid && vid.duration) {
+      const p = Math.min(100, Math.max(10, (vid.currentTime / vid.duration) * 100));
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${p}%`;
+      }
+      if (progressTextRef.current) {
+        progressTextRef.current.innerText = `${Math.round(p)}%`;
+      }
+      if (vid.currentTime >= vid.duration - 0.2) {
+        handleFinish();
+      }
     }
   };
 
@@ -216,8 +319,29 @@ export default function VideoLoader({ onComplete }) {
             }}
           />
 
-          {/* Skip Button */}
-          <div className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30">
+          {/* Header Action Buttons (Sound Toggle & Skip) */}
+          <div className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30 flex items-center gap-2.5">
+            {/* Audio Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#f5c042]/40 bg-black/50 backdrop-blur-md text-[#f5c042] hover:bg-[#f5c042]/20 transition-all duration-300 text-xs font-medium cursor-pointer shadow-lg"
+              title={isMuted ? "Tap to Unmute Sound" : "Sound Enabled"}
+            >
+              {isMuted ? (
+                <>
+                  <VolumeX size={14} className="text-[#f5c042] animate-pulse" />
+                  <span className="text-[11px] text-[#fff3c4] tracking-wide">Sound Off</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 size={14} className="text-[#f5c042]" />
+                  <span className="text-[11px] text-[#fff3c4] tracking-wide">Sound On</span>
+                </>
+              )}
+            </button>
+
+            {/* Skip Button */}
             <button
               type="button"
               onClick={handleFinish}
@@ -253,7 +377,11 @@ export default function VideoLoader({ onComplete }) {
             </motion.div>
 
             {/* Namaste Video Avatar with Golden Rings */}
-            <div className="relative w-[215px] h-[215px] sm:w-[245px] sm:h-[245px] my-3 flex items-center justify-center">
+            <div 
+              onClick={toggleSound}
+              className="relative w-[215px] h-[215px] sm:w-[245px] sm:h-[245px] my-3 flex items-center justify-center cursor-pointer group"
+              title="Click or Tap to toggle sound"
+            >
               {/* Outer Spinning Golden Mandala Dashed Ring */}
               <div
                 className="absolute w-[248px] h-[248px] sm:w-[278px] sm:h-[278px] rounded-full border border-dashed border-[#f5c042]/75 animate-spin [animation-duration:22s]"
@@ -279,18 +407,25 @@ export default function VideoLoader({ onComplete }) {
                   src={loadingVideo}
                   autoPlay
                   playsInline
+                  webkit-playsinline="true"
+                  x5-playsinline="true"
+                  x5-video-player-type="h5"
+                  muted
+                  defaultMuted
                   preload="auto"
-                  muted={false}
                   onEnded={handleFinish}
                   onTimeUpdate={handleTimeUpdate}
-                  onCanPlay={(e) => {
-                    e.target.muted = false;
-                    e.target.volume = 1.0;
-                    setVideoLoaded(true);
+                  onCanPlay={() => {
+                    const vid = videoRef.current;
+                    if (vid && vid.paused) {
+                      vid.play().catch(() => {});
+                    }
                   }}
-                  onLoadedData={(e) => {
-                    e.target.muted = false;
-                    e.target.volume = 1.0;
+                  onLoadedData={() => {
+                    const vid = videoRef.current;
+                    if (vid && vid.paused) {
+                      vid.play().catch(() => {});
+                    }
                   }}
                   style={{
                     width: "100%",
@@ -299,8 +434,6 @@ export default function VideoLoader({ onComplete }) {
                     objectPosition: "center 25%",
                     display: "block",
                     filter: "contrast(1.06) saturate(1.1) brightness(1.02)",
-                    opacity: videoLoaded ? 1 : 0.95,
-                    transition: "opacity 0.3s ease",
                   }}
                 />
 
@@ -308,6 +441,20 @@ export default function VideoLoader({ onComplete }) {
                 <div className="absolute inset-0 rounded-full pointer-events-none bg-gradient-to-tr from-black/20 via-transparent to-white/10" />
               </div>
             </div>
+
+            {/* Sound Prompt Hint for Mobile Users */}
+            {isMuted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                onClick={toggleSound}
+                className="inline-flex items-center gap-1.5 px-3 py-1 -mt-1 mb-1 rounded-full bg-black/40 border border-[#f5c042]/30 text-[11px] text-[#f5c042] cursor-pointer"
+              >
+                <Volume2 size={12} />
+                <span>Tap anywhere for sound</span>
+              </motion.div>
+            )}
 
             {/* Typography */}
             <motion.div
@@ -344,25 +491,26 @@ export default function VideoLoader({ onComplete }) {
               </p>
             </motion.div>
 
-            {/* Smooth Progress Indicator */}
+            {/* High-Performance Smooth Progress Indicator */}
             <div className="w-[230px] sm:w-[280px] flex flex-col items-center gap-2">
               <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden shadow-inner p-[1px]">
-                <motion.div
-                  className="h-full rounded-full"
+                <div
+                  ref={progressBarRef}
+                  className="h-full rounded-full transition-all duration-100 ease-out"
                   style={{
-                    width: `${progress}%`,
+                    width: "10%",
                     background: "linear-gradient(90deg, #c92a2a 0%, #f5c042 50%, #fff3c4 100%)",
                     boxShadow: "0 0 14px #f5c042",
                   }}
-                  transition={{ ease: "easeOut", duration: 0.1 }}
                 />
               </div>
 
               <div
+                ref={progressTextRef}
                 className="text-xs sm:text-sm font-semibold tracking-widest text-[#f5c042]"
                 style={{ fontFamily: "'Cinzel', monospace" }}
               >
-                {Math.round(progress)}%
+                10%
               </div>
             </div>
 
@@ -372,5 +520,6 @@ export default function VideoLoader({ onComplete }) {
     </AnimatePresence>
   );
 }
+
 
 
