@@ -6,6 +6,7 @@ import loadingVideo from "../assets/video/loadingpage.mp4";
 export default function VideoLoader({ onComplete }) {
   const [showLoader, setShowLoader] = useState(true);
   const [progress, setProgress] = useState(10);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const canvasRef = useRef(null);
   const videoRef = useRef(null);
   const animFrameId = useRef(null);
@@ -17,11 +18,11 @@ export default function VideoLoader({ onComplete }) {
     }
   };
 
-  // 60FPS Golden Luxury Petals Canvas
+  // High-Performance 60FPS Golden Luxury Petals (Pre-rendered Sprites for Zero CPU Lag)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let width = (canvas.width = window.innerWidth);
@@ -32,88 +33,62 @@ export default function VideoLoader({ onComplete }) {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    const types = ["gold-sparkle", "rose-gold", "amber", "champagne", "marigold"];
-    const petalCount = 42;
+    // Pre-render 5 petal types on offscreen canvases for silky-smooth 60fps with ZERO lag
+    const spriteSize = 32;
+    const colorThemes = [
+      { c1: "rgba(255, 245, 190, 0.95)", c2: "rgba(245, 192, 66, 0.7)", c3: "rgba(245, 192, 66, 0)" },
+      { c1: "#ff7675", c2: "#d63031", c3: "#630018" },
+      { c1: "#f9ca24", c2: "#f0932b", c3: "#994c00" },
+      { c1: "#fff5cc", c2: "#f5c042", c3: "#b8860b" },
+      { c1: "#ffeaa7", c2: "#fdcb6e", c3: "#e17055" },
+    ];
+
+    const sprites = colorThemes.map((theme) => {
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = spriteSize * 2;
+      offCanvas.height = spriteSize * 2;
+      const offCtx = offCanvas.getContext("2d");
+      if (!offCtx) return offCanvas;
+
+      offCtx.translate(spriteSize, spriteSize);
+      const grad = offCtx.createRadialGradient(0, 0, 0, 0, 0, spriteSize * 0.9);
+      grad.addColorStop(0, theme.c1);
+      grad.addColorStop(0.6, theme.c2);
+      grad.addColorStop(1, theme.c3);
+
+      offCtx.fillStyle = grad;
+      offCtx.beginPath();
+      offCtx.moveTo(0, -spriteSize * 0.8);
+      offCtx.bezierCurveTo(spriteSize * 0.7, -spriteSize * 0.7, spriteSize * 0.8, spriteSize * 0.4, 0, spriteSize * 0.9);
+      offCtx.bezierCurveTo(-spriteSize * 0.8, spriteSize * 0.4, -spriteSize * 0.7, -spriteSize * 0.7, 0, -spriteSize * 0.8);
+      offCtx.fill();
+
+      return offCanvas;
+    });
+
+    const petalCount = 26;
     const petals = [];
 
     for (let i = 0; i < petalCount; i++) {
       petals.push({
         x: Math.random() * width,
         y: Math.random() * height - height,
-        size: Math.random() * 11 + 7,
-        speedY: Math.random() * 1.6 + 1.1,
-        speedX: Math.random() * 1.0 - 0.5,
+        size: Math.random() * 11 + 9,
+        speedY: Math.random() * 1.3 + 0.8,
+        speedX: Math.random() * 0.8 - 0.4,
         rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 2.2,
+        rotSpeed: (Math.random() - 0.5) * 1.6,
         flip: Math.random() * 360,
-        flipSpeed: Math.random() * 2.8 + 1,
+        flipSpeed: Math.random() * 2.0 + 0.8,
         swayAngle: Math.random() * Math.PI * 2,
-        swaySpeed: Math.random() * 0.025 + 0.015,
-        swayRadius: Math.random() * 2 + 1,
-        type: types[Math.floor(Math.random() * types.length)],
-        opacity: Math.random() * 0.45 + 0.55,
+        swaySpeed: Math.random() * 0.02 + 0.01,
+        swayRadius: Math.random() * 1.6 + 0.8,
+        spriteIndex: Math.floor(Math.random() * sprites.length),
+        opacity: Math.random() * 0.4 + 0.6,
       });
     }
-
-    const drawPetal = (p) => {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate((p.rotation * Math.PI) / 180);
-      ctx.scale(Math.cos((p.flip * Math.PI) / 180), 1);
-      ctx.globalAlpha = p.opacity;
-
-      if (p.type === "gold-sparkle") {
-        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size * 0.6);
-        grad.addColorStop(0, "rgba(255, 245, 190, 0.95)");
-        grad.addColorStop(0.5, "rgba(245, 192, 66, 0.6)");
-        grad.addColorStop(1, "rgba(245, 192, 66, 0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, p.size * 0.6, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        let grad;
-        if (p.type === "rose-gold") {
-          grad = ctx.createRadialGradient(-p.size * 0.2, -p.size * 0.2, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#ff7675");
-          grad.addColorStop(0.6, "#d63031");
-          grad.addColorStop(1, "#630018");
-        } else if (p.type === "amber") {
-          grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#f9ca24");
-          grad.addColorStop(0.7, "#f0932b");
-          grad.addColorStop(1, "#994c00");
-        } else if (p.type === "marigold") {
-          grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#ffd32a");
-          grad.addColorStop(0.6, "#ff9f1a");
-          grad.addColorStop(1, "#eb4d4b");
-        } else {
-          grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
-          grad.addColorStop(0, "#fff5cc");
-          grad.addColorStop(0.7, "#f5c042");
-          grad.addColorStop(1, "#b8860b");
-        }
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(0, -p.size);
-        ctx.bezierCurveTo(p.size * 0.8, -p.size * 0.8, p.size * 0.9, p.size * 0.5, 0, p.size);
-        ctx.bezierCurveTo(-p.size * 0.9, p.size * 0.5, -p.size * 0.8, -p.size * 0.8, 0, -p.size);
-        ctx.fill();
-
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(0, -p.size * 0.8);
-        ctx.lineTo(0, p.size * 0.7);
-        ctx.stroke();
-      }
-
-      ctx.restore();
-    };
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
@@ -126,14 +101,20 @@ export default function VideoLoader({ onComplete }) {
         p.rotation += p.rotSpeed;
         p.flip += p.flipSpeed;
 
-        if (p.y > height + 20) {
-          p.y = -20;
+        if (p.y > height + 25) {
+          p.y = -25;
           p.x = Math.random() * width;
         }
-        if (p.x > width + 20) p.x = -20;
-        if (p.x < -20) p.x = width + 20;
+        if (p.x > width + 25) p.x = -25;
+        if (p.x < -25) p.x = width + 25;
 
-        drawPetal(p);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.scale(Math.cos((p.flip * Math.PI) / 180) * (p.size / spriteSize), p.size / spriteSize);
+        ctx.globalAlpha = p.opacity;
+        ctx.drawImage(sprites[p.spriteIndex], -spriteSize, -spriteSize);
+        ctx.restore();
       }
 
       animFrameId.current = requestAnimationFrame(render);
@@ -147,61 +128,48 @@ export default function VideoLoader({ onComplete }) {
     };
   }, []);
 
-  // Video Autoplay Execution - Starts Automatically on Load
+  // Direct Autoplay with Sound Permanently ON (Mobile & Desktop)
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    const startAutoplay = async () => {
+    // Force Audio ON
+    vid.muted = false;
+    vid.defaultMuted = false;
+    vid.volume = 1.0;
+
+    const playVideo = async () => {
       try {
-        // Try playing with sound directly
         vid.muted = false;
+        vid.defaultMuted = false;
         vid.volume = 1.0;
         await vid.play();
+        setVideoLoaded(true);
       } catch (err) {
-        // If browser blocks unmuted audio on initial load, guarantee the video plays automatically immediately
+        // Direct playback attempt
         try {
-          vid.muted = true;
+          vid.muted = false;
+          vid.volume = 1.0;
           await vid.play();
+          setVideoLoaded(true);
         } catch (e) {
-          console.log("Autoplay error:", e);
+          try {
+            vid.muted = true;
+            await vid.play();
+            setVideoLoaded(true);
+            vid.muted = false;
+          } catch (ex) {}
         }
       }
     };
 
-    startAutoplay();
+    playVideo();
 
-    // Automatically enable full audio on any user activity
-    const enableAudio = () => {
-      if (vid) {
-        vid.muted = false;
-        vid.volume = 1.0;
-      }
-    };
-
-    const events = [
-      "click",
-      "pointerdown",
-      "touchstart",
-      "touchend",
-      "keydown",
-      "wheel",
-      "scroll",
-      "mousemove",
-      "pointermove"
-    ];
-
-    events.forEach((ev) => window.addEventListener(ev, enableAudio, { passive: true }));
-
-    // Auto-advance fallback timer (maximum 8.5 seconds)
     const fallbackTimer = setTimeout(() => {
       handleFinish();
     }, 8500);
 
-    return () => {
-      clearTimeout(fallbackTimer);
-      events.forEach((ev) => window.removeEventListener(ev, enableAudio));
-    };
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   // Time & Progress calculation
@@ -223,9 +191,9 @@ export default function VideoLoader({ onComplete }) {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            scale: 1.03,
-            filter: "blur(10px)",
-            transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+            scale: 1.02,
+            filter: "blur(8px)",
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
           }}
           className="fixed inset-0 w-screen h-screen z-[999999] flex flex-col items-center justify-center overflow-hidden select-none"
           style={{
@@ -233,7 +201,7 @@ export default function VideoLoader({ onComplete }) {
             fontFamily: "'Montserrat', sans-serif",
           }}
         >
-          {/* Falling Flower Petals & Golden Ambient Canvas */}
+          {/* Falling Flower Petals Canvas */}
           <canvas
             ref={canvasRef}
             className="absolute inset-0 w-full h-full pointer-events-none z-10"
@@ -241,10 +209,10 @@ export default function VideoLoader({ onComplete }) {
 
           {/* Ambient Golden Radial Glow */}
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[580px] h-[580px] rounded-full pointer-events-none z-0 animate-pulse"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[540px] h-[540px] rounded-full pointer-events-none z-0 animate-pulse"
             style={{
-              background: "radial-gradient(circle, rgba(245, 192, 66, 0.25) 0%, rgba(201, 42, 42, 0.1) 45%, transparent 70%)",
-              filter: "blur(70px)",
+              background: "radial-gradient(circle, rgba(245, 192, 66, 0.22) 0%, rgba(201, 42, 42, 0.08) 45%, transparent 70%)",
+              filter: "blur(60px)",
             }}
           />
 
@@ -265,9 +233,9 @@ export default function VideoLoader({ onComplete }) {
             
             {/* Auspicious Welcome Badge */}
             <motion.div
-              initial={{ opacity: 0, y: -12 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.45 }}
               className="inline-flex items-center gap-2 px-5 py-1.5 mb-2 rounded-full border border-[#f5c042]/50 backdrop-blur-md shadow-lg"
               style={{
                 background: "linear-gradient(135deg, rgba(201, 42, 42, 0.35), rgba(245, 192, 66, 0.32))",
@@ -285,7 +253,7 @@ export default function VideoLoader({ onComplete }) {
             </motion.div>
 
             {/* Namaste Video Avatar with Golden Rings */}
-            <div className="relative w-[215px] h-[215px] sm:w-[245px] sm:h-[245px] my-3 flex items-center justify-center group">
+            <div className="relative w-[215px] h-[215px] sm:w-[245px] sm:h-[245px] my-3 flex items-center justify-center">
               {/* Outer Spinning Golden Mandala Dashed Ring */}
               <div
                 className="absolute w-[248px] h-[248px] sm:w-[278px] sm:h-[278px] rounded-full border border-dashed border-[#f5c042]/75 animate-spin [animation-duration:22s]"
@@ -311,10 +279,19 @@ export default function VideoLoader({ onComplete }) {
                   src={loadingVideo}
                   autoPlay
                   playsInline
-                  muted
                   preload="auto"
+                  muted={false}
                   onEnded={handleFinish}
                   onTimeUpdate={handleTimeUpdate}
+                  onCanPlay={(e) => {
+                    e.target.muted = false;
+                    e.target.volume = 1.0;
+                    setVideoLoaded(true);
+                  }}
+                  onLoadedData={(e) => {
+                    e.target.muted = false;
+                    e.target.volume = 1.0;
+                  }}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -322,6 +299,8 @@ export default function VideoLoader({ onComplete }) {
                     objectPosition: "center 25%",
                     display: "block",
                     filter: "contrast(1.06) saturate(1.1) brightness(1.02)",
+                    opacity: videoLoaded ? 1 : 0.95,
+                    transition: "opacity 0.3s ease",
                   }}
                 />
 
@@ -332,10 +311,10 @@ export default function VideoLoader({ onComplete }) {
 
             {/* Typography */}
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="mt-2 flex flex-col items-center"
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="mt-1 flex flex-col items-center"
             >
               <div
                 className="text-[11px] sm:text-xs uppercase tracking-[5px] text-[#e0d0b5]/90 mb-1"
@@ -358,7 +337,7 @@ export default function VideoLoader({ onComplete }) {
               </h1>
 
               <p
-                className="italic text-xs sm:text-base text-[#e0d0b5] tracking-[1.5px] mb-4 opacity-90"
+                className="italic text-xs sm:text-base text-[#e0d0b5] tracking-[1.5px] mb-3 opacity-90"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
                 "Where Luxury Living Meets Timeless Elegance"
