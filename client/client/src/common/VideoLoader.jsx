@@ -17,41 +17,6 @@ export default function VideoLoader({ onComplete }) {
     }
   };
 
-  // Immediate Audio Unlock function (Browser Autoplay compliance)
-  const unlockAudio = () => {
-    const vid = videoRef.current;
-    if (vid) {
-      vid.muted = false;
-      vid.volume = 1.0;
-      const playPromise = vid.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    }
-  };
-
-  // Screen-wide gesture listener for instant sound enablement if browser restricted initial unmuted autoplay
-  useEffect(() => {
-    const handleGesture = () => {
-      const vid = videoRef.current;
-      if (vid && vid.muted) {
-        unlockAudio();
-      }
-    };
-
-    window.addEventListener("click", handleGesture, { passive: true });
-    window.addEventListener("pointerdown", handleGesture, { passive: true });
-    window.addEventListener("touchstart", handleGesture, { passive: true });
-    window.addEventListener("keydown", handleGesture, { passive: true });
-
-    return () => {
-      window.removeEventListener("click", handleGesture);
-      window.removeEventListener("pointerdown", handleGesture);
-      window.removeEventListener("touchstart", handleGesture);
-      window.removeEventListener("keydown", handleGesture);
-    };
-  }, []);
-
   // 60FPS Golden Luxury Petals Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -182,22 +147,21 @@ export default function VideoLoader({ onComplete }) {
     };
   }, []);
 
-  // Video Autoplay Execution with Sound ON by Default
+  // Video Autoplay Execution - Starts Automatically on Load
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    // Audio Default ON
-    vid.muted = false;
-    vid.volume = 1.0;
-
-    const startPlayback = async () => {
+    const startAutoplay = async () => {
       try {
+        // Try playing with sound directly
+        vid.muted = false;
+        vid.volume = 1.0;
         await vid.play();
       } catch (err) {
-        // Browser Autoplay Policy suspended unmuted autoplay -> play muted first, unlock on gesture
-        vid.muted = true;
+        // If browser blocks unmuted audio on initial load, guarantee the video plays automatically immediately
         try {
+          vid.muted = true;
           await vid.play();
         } catch (e) {
           console.log("Autoplay error:", e);
@@ -205,14 +169,39 @@ export default function VideoLoader({ onComplete }) {
       }
     };
 
-    startPlayback();
+    startAutoplay();
+
+    // Automatically enable full audio on any user activity
+    const enableAudio = () => {
+      if (vid) {
+        vid.muted = false;
+        vid.volume = 1.0;
+      }
+    };
+
+    const events = [
+      "click",
+      "pointerdown",
+      "touchstart",
+      "touchend",
+      "keydown",
+      "wheel",
+      "scroll",
+      "mousemove",
+      "pointermove"
+    ];
+
+    events.forEach((ev) => window.addEventListener(ev, enableAudio, { passive: true }));
 
     // Auto-advance fallback timer (maximum 8.5 seconds)
     const fallbackTimer = setTimeout(() => {
       handleFinish();
     }, 8500);
 
-    return () => clearTimeout(fallbackTimer);
+    return () => {
+      clearTimeout(fallbackTimer);
+      events.forEach((ev) => window.removeEventListener(ev, enableAudio));
+    };
   }, []);
 
   // Time & Progress calculation
@@ -259,6 +248,18 @@ export default function VideoLoader({ onComplete }) {
             }}
           />
 
+          {/* Skip Button */}
+          <div className="absolute top-5 right-5 sm:top-7 sm:right-7 z-30">
+            <button
+              type="button"
+              onClick={handleFinish}
+              className="px-4 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md text-[#e0d0b5] hover:text-white hover:border-[#f5c042]/60 hover:bg-[#f5c042]/10 transition-all duration-300 text-xs font-medium cursor-pointer"
+              style={{ fontFamily: "'Montserrat', sans-serif" }}
+            >
+              Skip
+            </button>
+          </div>
+
           {/* Main Loader Content Center */}
           <div className="relative z-20 flex flex-col items-center text-center max-w-[92vw] px-4">
             
@@ -300,7 +301,7 @@ export default function VideoLoader({ onComplete }) {
 
               {/* Central Video Frame */}
               <div
-                className="relative w-[205px] h-[205px] sm:w-[235px] sm:h-[235px] rounded-full overflow-hidden border-[3px] border-[#f5c042] bg-black shadow-2xl flex items-center justify-center group-hover:border-[#fff3c4] transition-all duration-300"
+                className="relative w-[205px] h-[205px] sm:w-[235px] sm:h-[235px] rounded-full overflow-hidden border-[3px] border-[#f5c042] bg-black shadow-2xl flex items-center justify-center"
                 style={{
                   boxShadow: "0 0 45px rgba(245, 192, 66, 0.6), inset 0 0 20px rgba(0, 0, 0, 0.6)",
                 }}
@@ -310,16 +311,10 @@ export default function VideoLoader({ onComplete }) {
                   src={loadingVideo}
                   autoPlay
                   playsInline
+                  muted
                   preload="auto"
                   onEnded={handleFinish}
                   onTimeUpdate={handleTimeUpdate}
-                  onLoadedData={() => {
-                    const vid = videoRef.current;
-                    if (vid) {
-                      vid.volume = 1.0;
-                      vid.play().catch(() => {});
-                    }
-                  }}
                   style={{
                     width: "100%",
                     height: "100%",
